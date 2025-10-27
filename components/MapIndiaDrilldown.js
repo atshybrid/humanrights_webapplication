@@ -1,6 +1,7 @@
 import { memo, useEffect, useMemo, useState } from 'react'
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps'
 import { getStatesGeoJSON, getDistrictsGeoJSON, getMandalsGeoJSON } from '../lib/api'
+import IndiaZonesMap from './IndiaZonesMap'
 import { Skeleton } from './Skeleton'
 
 // Contract:
@@ -30,6 +31,7 @@ function MapIndiaDrilldown({
   const [statesGeo, setStatesGeo] = useState(null)
   const [districtsGeo, setDistrictsGeo] = useState(null)
   const [mandalsGeo, setMandalsGeo] = useState(null)
+  const [geoError, setGeoError] = useState(null)
 
   const [position, setPosition] = useState({ coordinates: [80, 22], zoom: 1 })
   const [loading, setLoading] = useState(false)
@@ -38,10 +40,18 @@ function MapIndiaDrilldown({
   useEffect(() => {
     let active = true
     setLoading(true)
-    getStatesGeoJSON(countryId).then((g) => {
-      if (!active) return
-      setStatesGeo(g)
-    }).finally(() => active && setLoading(false))
+    setGeoError(null)
+    getStatesGeoJSON(countryId)
+      .then((g) => {
+        if (!active) return
+        setStatesGeo(g)
+      })
+      .catch(() => {
+        if (!active) return
+        setGeoError('states')
+        setStatesGeo(null)
+      })
+      .finally(() => active && setLoading(false))
     return () => { active = false }
   }, [countryId])
 
@@ -50,7 +60,10 @@ function MapIndiaDrilldown({
     if (!selectedStateId || (level !== 'DISTRICT' && level !== 'MANDAL')){ setDistrictsGeo(null); return }
     let active = true
     setLoading(true)
-    getDistrictsGeoJSON(selectedStateId).then((g)=> { if(active) setDistrictsGeo(g) }).finally(()=> active && setLoading(false))
+    getDistrictsGeoJSON(selectedStateId)
+      .then((g)=> { if(active) setDistrictsGeo(g) })
+      .catch(() => { if(active) { setGeoError('districts'); setDistrictsGeo(null) } })
+      .finally(()=> active && setLoading(false))
     return () => { active = false }
   }, [selectedStateId, level])
 
@@ -59,7 +72,10 @@ function MapIndiaDrilldown({
     if (!selectedDistrictId || level !== 'MANDAL'){ setMandalsGeo(null); return }
     let active = true
     setLoading(true)
-    getMandalsGeoJSON(selectedDistrictId).then((g)=> { if(active) setMandalsGeo(g) }).finally(()=> active && setLoading(false))
+    getMandalsGeoJSON(selectedDistrictId)
+      .then((g)=> { if(active) setMandalsGeo(g) })
+      .catch(() => { if(active) { setGeoError('mandals'); setMandalsGeo(null) } })
+      .finally(()=> active && setLoading(false))
     return () => { active = false }
   }, [selectedDistrictId, level])
 
@@ -129,6 +145,11 @@ function MapIndiaDrilldown({
 
   return (
     <div className="relative rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+      {geoError === 'states' && (
+        <div className="absolute inset-x-0 top-0 z-10 m-3 rounded-lg bg-amber-50 text-amber-900 ring-1 ring-amber-200 p-3 text-xs">
+          Detailed map data isnt available right now. You can still pick a Zone or use the selectors below.
+        </div>
+      )}
       <div className="absolute right-3 top-3 z-10 flex gap-2">
         <button onClick={zoomOut} className="h-8 w-8 rounded-full bg-white text-gray-700 ring-1 ring-gray-200 shadow hover:bg-gray-50">−</button>
         <button onClick={zoomIn} className="h-8 w-8 rounded-full bg-white text-gray-700 ring-1 ring-gray-200 shadow hover:bg-gray-50">+</button>
@@ -138,7 +159,11 @@ function MapIndiaDrilldown({
       <div className="relative" style={{ aspectRatio: '4 / 3' }}>
         {!statesGeo ? (
           <div className="absolute inset-0 p-4">
-            <Skeleton className="h-full w-full rounded-xl" />
+            {geoError === 'states' ? (
+              <IndiaZonesMap selectedZone={selectedZone} onSelectZone={(z)=>{ /* zone-only fallback */ }} />
+            ) : (
+              <Skeleton className="h-full w-full rounded-xl" />
+            )}
           </div>
         ) : (
           <ComposableMap projection="geoMercator" projectionConfig={{ center: [82.8, 22.5], scale: 1200 }} width={800} height={600} style={{ width: '100%', height: '100%' }}>

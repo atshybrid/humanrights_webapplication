@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
+import Script from 'next/script'
 import IndiaZonesMap from '../components/IndiaZonesMap'
 import dynamic from 'next/dynamic'
 const MapIndiaDrilldown = dynamic(() => import('../components/MapIndiaDrilldown'), { ssr: false })
@@ -13,6 +14,8 @@ import {
   getHrcDistricts,
   getHrcMandals,
   getMembershipAvailability,
+  createMembershipOrderPayfirst,
+  confirmMembershipPayfirst,
 } from '../lib/api'
 
 const LEVELS = ['NATIONAL','ZONE','STATE','DISTRICT','MANDAL']
@@ -44,11 +47,18 @@ export default function MembersPage(){
   const [availability, setAvailability] = useState(null)
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
   const [availabilityError, setAvailabilityError] = useState('')
+  const [joinOpen, setJoinOpen] = useState(false)
+  const [joinMobile, setJoinMobile] = useState('')
+  const [joinError, setJoinError] = useState('')
+  const [joinLoading, setJoinLoading] = useState(false)
+  const [joinResult, setJoinResult] = useState(null)
+  const [lastOrder, setLastOrder] = useState(null)
 
   // Helpers to resolve selected display names
   const selectedState = useMemo(() => (states||[]).find(s=> s.id === selectedStateId) || null, [states, selectedStateId])
   const selectedDistrict = useMemo(() => (districts||[]).find(d=> d.id === selectedDistrictId) || null, [districts, selectedDistrictId])
   const selectedMandal = useMemo(() => (mandals||[]).find(m=> m.id === selectedMandalId) || null, [mandals, selectedMandalId])
+  const activeCell = useMemo(() => (cells||[]).find(c=> c.id === activeCellId) || null, [cells, activeCellId])
 
   // Validate required params for availability
   const requiredHint = useMemo(() => {
@@ -155,11 +165,96 @@ export default function MembersPage(){
     }
   }
 
+  const canJoin = useMemo(() => {
+    const rem = Number(availability?.remaining || 0)
+    return rem > 0 && !requiredHint && activeCell && designationCode
+  }, [availability, requiredHint, activeCell, designationCode])
+
+  const buildLocationPayload = () => {
+    const payload = { level }
+    if (selectedCountryId) payload.hrcCountryId = selectedCountryId
+    if (level === 'ZONE') payload.zone = selectedZone
+    if (level === 'STATE') payload.hrcStateId = selectedStateId
+    if (level === 'DISTRICT') payload.hrcDistrictId = selectedDistrictId
+    if (level === 'MANDAL') payload.hrcMandalId = selectedMandalId
+    return payload
+  }
+
+  const handleJoin = async (e) => {
+    e?.preventDefault?.()
+    setJoinError('')
+    setJoinResult(null)
+    // simple validation for Indian mobile numbers (10 digits)
+    const mobile = String(joinMobile || '').trim()
+    if (!/^[0-9]{10}$/.test(mobile)){
+      setJoinError('Enter a valid 10-digit mobile number')
+      return
+    }
+    try{
+      setJoinLoading(true)
+      const payload = {
+        cell: activeCell?.code, // API expects cell code for payfirst
+        designationCode, // expects designation code
+        ...buildLocationPayload(),
+        mobileNumber: mobile,
+      }
+      const orderWrap = await createMembershipOrderPayfirst(payload)
+      const order = orderWrap?.order || orderWrap?.data?.order || orderWrap
+      const key = order?.providerKeyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID
+      const rzpOrderId = order?.providerOrderId
+      const orderId = order?.orderId
+      setLastOrder({ orderId, rzpOrderId })
+      if (!key || !rzpOrderId){
+        setJoinError('Payment configuration missing. Backend must return providerKeyId and providerOrderId, or set NEXT_PUBLIC_RAZORPAY_KEY_ID.')
+        setJoinLoading(false)
+        return
+      }
+
+      const options = {
+        key,
+        amount: Math.round((order?.amount || order?.priceAfterDiscount || 0) * 100),
+        currency: order?.currency || 'INR',
+        name: 'HRCI Membership',
+        description: `${activeCell?.name || 'Cell'} — ${designationCode}`,
+        order_id: rzpOrderId,
+        prefill: { contact: mobile },
+        theme: { color: '#FE0002' },
+        handler: async function (response){
+          try{
+            const confirmBody = { orderId: orderId || rzpOrderId, status: 'SUCCESS' }
+            const confirm = await confirmMembershipPayfirst(confirmBody)
+            setJoinResult(confirm)
+          }catch(err){
+            console.error(err)
+            setJoinError('Payment confirmation failed. Please contact support with your payment ID.')
+          }finally{
+            setJoinLoading(false)
+          }
+        },
+        modal: { ondismiss: () => setJoinLoading(false) }
+      }
+
+      if (typeof window !== 'undefined' && window.Razorpay){
+        const rzp = new window.Razorpay(options)
+        rzp.open()
+      } else {
+        setJoinError('Payment SDK not loaded. Please refresh and try again.')
+        setJoinLoading(false)
+      }
+    }catch(err){
+      console.error(err)
+      setJoinError('Could not create membership order. Please try again later.')
+      setJoinLoading(false)
+    }
+  }
+
   return (
     <>
       <Head>
         <title>Members & Volunteers — HRCI</title>
       </Head>
+      {/* Razorpay SDK */}
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       <main className="max-w-6xl mx-auto px-6 py-8">
         <header>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">Members & Volunteers</h1>
@@ -305,6 +400,11 @@ export default function MembersPage(){
                 </div>
               )}
             </div>
+                  {canJoin ? (
+                    <div className="mt-3">
+                      <button onClick={()=> setJoinOpen(true)} className="inline-flex items-center rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary">Join as member</button>
+                    </div>
+                  ) : null}
           </div>
 
           {/* Availability & designation */}
@@ -369,6 +469,42 @@ export default function MembersPage(){
           </div>
         </section>
       </main>
+
+      {/* Join dialog */}
+      {joinOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg">
+            <div className="flex items-start justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Join & pay</h3>
+              <button onClick={()=> setJoinOpen(false)} aria-label="Close" className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            <p className="mt-1 text-sm text-gray-600">Proceed to reserve your seat and complete payment.</p>
+            <form onSubmit={handleJoin} className="mt-4 space-y-3">
+              <div>
+                <label className="text-xs text-gray-500">Mobile number</label>
+                <input value={joinMobile} onChange={(e)=> setJoinMobile(e.target.value)} placeholder="10-digit mobile" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+              </div>
+              {joinError ? <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">{joinError}</div> : null}
+              <div className="flex items-center justify-end gap-2">
+                <button type="button" onClick={()=> setJoinOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">Cancel</button>
+                <button type="submit" disabled={joinLoading} className="inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary disabled:opacity-60">{joinLoading ? 'Processing…' : 'Continue to pay'}</button>
+              </div>
+            </form>
+
+            {joinResult && (
+              <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-800">
+                <p className="font-semibold text-green-700">Payment successful</p>
+                <div className="mt-2 grid grid-cols-2 gap-y-1">
+                  <span className="text-gray-500">Status</span><span className="font-semibold">{joinResult.status || joinResult.data?.status || 'PAID'}</span>
+                  <span className="text-gray-500">Seat</span><span className="font-semibold">{joinResult.seatDetails?.designation?.name} — {joinResult.seatDetails?.cell?.name}</span>
+                  <span className="text-gray-500">Level</span><span className="font-semibold">{joinResult.seatDetails?.level}</span>
+                </div>
+                <p className="mt-2 text-xs text-gray-600">Next: Download the Khabarx mobile app and log in to access your membership tools.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   )
 }
