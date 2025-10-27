@@ -23,6 +23,7 @@ export default function Navbar() {
     <>
       <Link href={to('about')} className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-secondary" onClick={onClick}>About</Link>
       <Link href={to('donations')} className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-secondary" onClick={onClick}>Donations</Link>
+      <Link href="/members" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-secondary" onClick={onClick}>Members</Link>
   <Link href={to('success-stories')} className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-secondary" onClick={onClick}>Stories</Link>
       <Link href={to('donor-wall')} className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-secondary" onClick={onClick}>Donors</Link>
       <Link href={to('documents')} className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-secondary" onClick={onClick}>Documents</Link>
