@@ -27,6 +27,7 @@ function MapIndiaDrilldown({
   selectedStateId, setSelectedStateId,
   selectedDistrictId, setSelectedDistrictId,
   selectedMandalId, setSelectedMandalId,
+  statesList,
 }){
   const [statesGeo, setStatesGeo] = useState(null)
   const [districtsGeo, setDistrictsGeo] = useState(null)
@@ -94,10 +95,29 @@ function MapIndiaDrilldown({
   const fillActive = '#c7d2fe'
   const fillZone = '#dbeafe'
 
+  // 3D-like styling using SVG drop shadow; applied on hover/selected
+  const shadowFilter = 'url(#geoDropShadow)'
+
+  const normalize = (s) => String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim()
+
+  const resolveStateId = (geo) => {
+    const fid = geo.properties?.id || geo.id
+    if (!statesList || !Array.isArray(statesList) || !statesList.length) return fid
+    // If the feature id already matches an existing state id, use it
+    if (statesList.find(s => s.id === fid)) return fid
+    // Try name-based mapping
+    const props = geo.properties || {}
+    const name = props.name || props.NAME_1 || props.st_nm || props.ST_NM || props.state_name || props.STATE || props.State || ''
+    const norm = normalize(name)
+    const match = statesList.find(s => normalize(s.name) === norm)
+    return match ? match.id : fid
+  }
+
   const renderGeos = (geojson, type) => (
     <Geographies geography={geojson}>
       {({ geographies }) => geographies.map((geo) => {
-        const id = geo.properties?.id || geo.id
+        const rawId = geo.properties?.id || geo.id
+        const id = type==='state' ? resolveStateId(geo) : rawId
         const zone = geo.properties?.zone
         const isStateSelected = type==='state' && selectedStateId && id === selectedStateId
         const isDistrictSelected = type==='district' && selectedDistrictId && id === selectedDistrictId
@@ -128,12 +148,14 @@ function MapIndiaDrilldown({
                 outline: 'none',
                 stroke,
                 strokeWidth: 0.5,
+                filter: isSelected ? shadowFilter : undefined,
               },
               hover: {
                 fill: fillActive,
                 outline: 'none',
                 stroke,
                 strokeWidth: 0.7,
+                filter: shadowFilter,
               },
               pressed: { fill: fillActive, outline: 'none' },
             }}
@@ -145,11 +167,19 @@ function MapIndiaDrilldown({
 
   return (
     <div className="relative rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-      {geoError === 'states' && (
-        <div className="absolute inset-x-0 top-0 z-10 m-3 rounded-lg bg-amber-50 text-amber-900 ring-1 ring-amber-200 p-3 text-xs">
-          Detailed map data isnt available right now. You can still pick a Zone or use the selectors below.
-        </div>
-      )}
+      {/* SVG defs for 3D-like drop shadow and subtle gradient */}
+      <svg width="0" height="0" className="absolute">
+        <defs>
+          <filter id="geoDropShadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="1.5" stdDeviation="1.2" floodColor="#000000" floodOpacity="0.18" />
+          </filter>
+          <linearGradient id="geoGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.0" />
+            <stop offset="100%" stopColor="#000000" stopOpacity="0.05" />
+          </linearGradient>
+        </defs>
+      </svg>
+      {/* Silent fallback: no alert banner when states GeoJSON is unavailable */}
       <div className="absolute right-3 top-3 z-10 flex gap-2">
         <button onClick={zoomOut} className="h-8 w-8 rounded-full bg-white text-gray-700 ring-1 ring-gray-200 shadow hover:bg-gray-50">−</button>
         <button onClick={zoomIn} className="h-8 w-8 rounded-full bg-white text-gray-700 ring-1 ring-gray-200 shadow hover:bg-gray-50">+</button>
@@ -159,6 +189,7 @@ function MapIndiaDrilldown({
       <div className="relative" style={{ aspectRatio: '4 / 3' }}>
         {!statesGeo ? (
           <div className="absolute inset-0 p-4">
+            {/* If states geojson is unavailable, show zones map as a graceful fallback */}
             {geoError === 'states' ? (
               <IndiaZonesMap selectedZone={selectedZone} onSelectZone={(z)=>{ /* zone-only fallback */ }} />
             ) : (

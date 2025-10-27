@@ -37,14 +37,14 @@ export default function Navbar() {
         <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-secondary via-primary to-secondary opacity-80" />
         <nav className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
-            <Link href="/" className="flex items-center gap-3">
+            <Link href="/" className="flex min-w-0 flex-1 items-center gap-3">
               {logo ? (
                 <img src={logo} alt="Logo" className="h-9 w-9 rounded bg-gray-100 object-contain p-1 ring-1 ring-gray-200" />
               ) : (
                 <Skeleton className="h-9 w-9 rounded" />
               )}
               {orgName ? (
-                <span className="text-sm sm:text-base font-semibold text-gray-900 whitespace-nowrap">{orgName}</span>
+                <span className="text-sm sm:text-base font-semibold text-gray-900 truncate max-w-[55vw] sm:max-w-none">{orgName}</span>
               ) : (
                 <Skeleton className="h-5 w-48 rounded" />
               )}
@@ -62,7 +62,7 @@ export default function Navbar() {
 
             <button
               aria-label="Toggle navigation"
-              className="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-secondary"
+              className="md:hidden ml-2 inline-flex flex-shrink-0 items-center justify-center rounded-md p-2 text-gray-700 hover:bg-gray-100 hover:text-secondary"
               onClick={() => setOpen(!open)}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6">

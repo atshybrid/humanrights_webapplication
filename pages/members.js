@@ -319,8 +319,54 @@ export default function MembersPage(){
                     setSelectedDistrictId={setSelectedDistrictId}
                     selectedMandalId={selectedMandalId}
                     setSelectedMandalId={setSelectedMandalId}
+                    statesList={states}
                   />
                   <div className="text-xs text-gray-600">Tip: Click a state to drill into districts; click a district to drill into mandals. Use the +/− to zoom and Reset to go back.</div>
+                  {/* Map-wise list synced to current level/selection */}
+                  <div className="rounded-xl ring-1 ring-gray-200 bg-gray-50 p-3">
+                    <p className="text-sm font-semibold text-gray-800">Map-wise list</p>
+                    <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-auto">
+                      {level === 'ZONE' && (
+                        (zones||[]).map(z => (
+                          <button
+                            key={z}
+                            onClick={()=> setSelectedZone(z)}
+                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedZone===z? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
+                          >{z}</button>
+                        ))
+                      )}
+                      {(level === 'STATE') && (
+                        (filteredStates||[]).map(s => (
+                          <button
+                            key={s.id}
+                            onClick={()=> setSelectedStateId(s.id)}
+                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedStateId===s.id? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
+                          >{s.name}</button>
+                        ))
+                      )}
+                      {(level === 'DISTRICT') && (
+                        (districts||[]).map(d => (
+                          <button
+                            key={d.id}
+                            onClick={()=> setSelectedDistrictId(d.id)}
+                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedDistrictId===d.id? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
+                          >{d.name}</button>
+                        ))
+                      )}
+                      {(level === 'MANDAL') && (
+                        (mandals||[]).map(m => (
+                          <button
+                            key={m.id}
+                            onClick={()=> setSelectedMandalId(m.id)}
+                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedMandalId===m.id? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
+                          >{m.name}</button>
+                        ))
+                      )}
+                      {level === 'NATIONAL' && (
+                        <div className="text-xs text-gray-600">Switch to Zone/State/District/Mandal to see lists.</div>
+                      )}
+                    </div>
+                  </div>
                   {/* Controls under map */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {level === 'ZONE' && (
@@ -497,7 +543,24 @@ export default function MembersPage(){
             <form onSubmit={handleJoin} className="mt-4 space-y-3">
               <div>
                 <label className="text-xs text-gray-500">Mobile number</label>
-                <input value={joinMobile} onChange={(e)=> setJoinMobile(e.target.value)} placeholder="10-digit mobile" className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={10}
+                  value={joinMobile}
+                  onChange={(e)=> {
+                    const onlyNums = (e.target.value || '').replace(/\D/g,'').slice(0,10)
+                    setJoinMobile(onlyNums)
+                    if (onlyNums.length === 10) {
+                      // Auto-close mobile keyboard by blurring the input
+                      try { e.target.blur() } catch(_) {}
+                    }
+                  }}
+                  placeholder="10-digit mobile"
+                  className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                />
+                <p className="mt-1 text-[11px] text-gray-500">We’ll auto-close the keyboard once you enter 10 digits.</p>
               </div>
               {joinError ? <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-800">{joinError}</div> : null}
               <div className="flex items-center justify-end gap-2">
