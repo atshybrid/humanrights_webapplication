@@ -45,6 +45,24 @@ export default function MembersPage(){
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
   const [availabilityError, setAvailabilityError] = useState('')
 
+  // Helpers to resolve selected display names
+  const selectedState = useMemo(() => (states||[]).find(s=> s.id === selectedStateId) || null, [states, selectedStateId])
+  const selectedDistrict = useMemo(() => (districts||[]).find(d=> d.id === selectedDistrictId) || null, [districts, selectedDistrictId])
+  const selectedMandal = useMemo(() => (mandals||[]).find(m=> m.id === selectedMandalId) || null, [mandals, selectedMandalId])
+
+  // Validate required params for availability
+  const requiredHint = useMemo(() => {
+    if (!activeCellId) return 'Select a cell'
+    if (!designationCode) return 'Select a designation'
+    if (level === 'NATIONAL') return null
+    if (level === 'ZONE' && !selectedZone) return 'Select a zone'
+    if (level === 'STATE' && !selectedStateId) return 'Select a state'
+    if (level === 'DISTRICT' && !selectedDistrictId) return 'Select a district'
+    if (level === 'MANDAL' && !selectedMandalId) return 'Select a mandal'
+    return null
+  }, [activeCellId, designationCode, level, selectedZone, selectedStateId, selectedDistrictId, selectedMandalId])
+  const canCheck = !availabilityLoading && !requiredHint
+
   useEffect(() => {
     // boot: cells, designations, countries, zones
     setCellsLoading(true)
@@ -193,6 +211,54 @@ export default function MembersPage(){
                     setSelectedMandalId={setSelectedMandalId}
                   />
                   <div className="text-xs text-gray-600">Tip: Click a state to drill into districts; click a district to drill into mandals. Use the +/− to zoom and Reset to go back.</div>
+                  {/* Controls under map */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {level === 'ZONE' && (
+                      <div>
+                        <label className="text-xs text-gray-500">Zone</label>
+                        <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedZone} onChange={e=> setSelectedZone(e.target.value)}>
+                          <option value="">Select</option>
+                          {(zones||[]).map(z=> <option key={z} value={z}>{z}</option>)}
+                        </select>
+                      </div>
+                    )}
+                    {(level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL') && (
+                      <>
+                        <div>
+                          <label className="text-xs text-gray-500">State</label>
+                          <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedStateId} onChange={e=> setSelectedStateId(e.target.value)}>
+                            <option value="">Select</option>
+                            {(filteredStates||[]).map(s=> <option key={s.id} value={s.id}>{s.name}</option>)}
+                          </select>
+                        </div>
+                        {(level === 'DISTRICT' || level === 'MANDAL') && (
+                          <div>
+                            <label className="text-xs text-gray-500">District</label>
+                            <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> setSelectedDistrictId(e.target.value)}>
+                              <option value="">Select</option>
+                              {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
+                            </select>
+                          </div>
+                        )}
+                        {level === 'MANDAL' && (
+                          <div>
+                            <label className="text-xs text-gray-500">Mandal</label>
+                            <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> setSelectedMandalId(e.target.value)}>
+                              <option value="">Select</option>
+                              {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
+                            </select>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  {/* Selection chips */}
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {level === 'ZONE' && selectedZone ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">Zone: {selectedZone}</span> : null}
+                    {selectedState ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">State: {selectedState.name}</span> : null}
+                    {selectedDistrict ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">District: {selectedDistrict.name}</span> : null}
+                    {selectedMandal ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">Mandal: {selectedMandal.name}</span> : null}
+                  </div>
                 </div>
               ) : (
                 <div className="text-sm text-gray-600">
@@ -257,9 +323,10 @@ export default function MembersPage(){
                     </select>
                   )}
                 </div>
-                <button disabled={!activeCellId || !level || availabilityLoading} onClick={onCheckAvailability} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary disabled:opacity-60">
+                <button disabled={!canCheck} onClick={onCheckAvailability} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary disabled:opacity-60">
                   {availabilityLoading ? 'Checking...' : 'Check availability'}
                 </button>
+                {requiredHint ? <p className="-mt-2 text-xs text-gray-500">{requiredHint}</p> : null}
                 {availabilityError ? <p className="text-sm text-red-600">{availabilityError}</p> : null}
                 {availability && (
                   <div className="rounded-lg bg-gray-50 p-3 text-sm text-gray-800">
