@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
 import Script from 'next/script'
+import { useRouter } from 'next/router'
 import IndiaZonesMap from '../components/IndiaZonesMap'
 import dynamic from 'next/dynamic'
 const MapIndiaDrilldown = dynamic(() => import('../components/MapIndiaDrilldown'), { ssr: false })
@@ -21,6 +22,7 @@ import {
 const LEVELS = ['NATIONAL','ZONE','STATE','DISTRICT','MANDAL']
 
 export default function MembersPage(){
+  const router = useRouter()
   const [level, setLevel] = useState('NATIONAL')
   const [cells, setCells] = useState([])
   const [cellsLoading, setCellsLoading] = useState(true)
@@ -223,7 +225,20 @@ export default function MembersPage(){
           try{
             const confirmBody = { orderId: orderId || rzpOrderId, status: 'SUCCESS' }
             const confirm = await confirmMembershipPayfirst(confirmBody)
-            setJoinResult(confirm)
+            try {
+              if (typeof window !== 'undefined') {
+                sessionStorage.setItem('hrci_join_success', JSON.stringify({
+                  confirm,
+                  cell: activeCell?.name,
+                  cellCode: activeCell?.code,
+                  designationCode,
+                  level,
+                  orderId: orderId || rzpOrderId,
+                }))
+              }
+            } catch (e) {}
+            // Navigate to success page
+            router.push({ pathname: '/members/success', query: { orderId: orderId || rzpOrderId } })
           }catch(err){
             console.error(err)
             setJoinError('Payment confirmation failed. Please contact support with your payment ID.')
@@ -491,17 +506,7 @@ export default function MembersPage(){
               </div>
             </form>
 
-            {joinResult && (
-              <div className="mt-4 rounded-lg bg-gray-50 p-3 text-sm text-gray-800">
-                <p className="font-semibold text-green-700">Payment successful</p>
-                <div className="mt-2 grid grid-cols-2 gap-y-1">
-                  <span className="text-gray-500">Status</span><span className="font-semibold">{joinResult.status || joinResult.data?.status || 'PAID'}</span>
-                  <span className="text-gray-500">Seat</span><span className="font-semibold">{joinResult.seatDetails?.designation?.name} — {joinResult.seatDetails?.cell?.name}</span>
-                  <span className="text-gray-500">Level</span><span className="font-semibold">{joinResult.seatDetails?.level}</span>
-                </div>
-                <p className="mt-2 text-xs text-gray-600">Next: Download the Khabarx mobile app and log in to access your membership tools.</p>
-              </div>
-            )}
+            {/* Success panel moved to dedicated page */}
           </div>
         </div>
       )}
