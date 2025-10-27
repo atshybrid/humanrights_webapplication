@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
 import IndiaZonesMap from '../components/IndiaZonesMap'
+import dynamic from 'next/dynamic'
+const MapIndiaDrilldown = dynamic(() => import('../components/MapIndiaDrilldown'), { ssr: false })
 import { Skeleton } from '../components/Skeleton'
 import {
   getHrcCells,
@@ -177,8 +179,21 @@ export default function MembersPage(){
           {/* Map / visual */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm p-4">
-              {level === 'NATIONAL' || level === 'ZONE' ? (
-                <IndiaZonesMap selectedZone={selectedZone} onSelectZone={(z)=>{ setSelectedZone(z); setLevel('ZONE') }} />
+              {(level === 'NATIONAL' || level === 'ZONE' || level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL') ? (
+                <div className="space-y-4">
+                  <MapIndiaDrilldown
+                    countryId={selectedCountryId}
+                    level={level}
+                    selectedZone={selectedZone}
+                    selectedStateId={selectedStateId}
+                    setSelectedStateId={setSelectedStateId}
+                    selectedDistrictId={selectedDistrictId}
+                    setSelectedDistrictId={setSelectedDistrictId}
+                    selectedMandalId={selectedMandalId}
+                    setSelectedMandalId={setSelectedMandalId}
+                  />
+                  <div className="text-xs text-gray-600">Tip: Click a state to drill into districts; click a district to drill into mandals. Use the +/− to zoom and Reset to go back.</div>
+                </div>
               ) : (
                 <div className="text-sm text-gray-600">
                   <p className="font-semibold">Location selection</p>
