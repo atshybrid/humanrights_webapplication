@@ -6,9 +6,9 @@ export default function Contact(){
       <p className="mt-4 text-gray-600">Reach us for donations, legal help, or partnerships.</p>
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <p><strong>Address</strong><br/>Human Rights Council - India<br/>Hyderabad, Telangana</p>
-          <p className="mt-2"><strong>Email</strong><br/>contact@hrc-india.org</p>
-          <p className="mt-2"><strong>Phone</strong><br/>+91 90000 00000</p>
+          <p><strong>Address</strong><br/>HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)<br/>7/19 CENAL CENTER KARAMCHEDU , PRAKASAM , BAPATLA 523138 Andhra Pradesh, India</p>
+          <p className="mt-2"><strong>Email</strong><br/>support@humanrightscouncilforindia.org</p>
+          <p className="mt-2"><strong>Phone</strong><br/>+91 8906189999</p>
         </div>
         <form className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
           <label className="block">

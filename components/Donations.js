@@ -14,6 +14,11 @@ export default function Donations(){
       .finally(()=>{ if(alive){ setLoading(false) } })
     return () => { alive = false }
   },[])
+  // Hide the generic event card on landing page
+  const filteredEvents = (events || []).filter(ev => {
+    const title = (ev?.title || '').toString()
+    return !/\bgeneral donation\b/i.test(title)
+  })
   const formatINR = (n) => {
     try { return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n||0) } catch(e){ return `₹${(n||0).toLocaleString('en-IN')}` }
   }
@@ -29,25 +34,10 @@ export default function Donations(){
             <CardSkeleton />
             <CardSkeleton />
           </>
-        ) : events.length === 0 ? (
-          <>
-            <div className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
-              <h4 className="font-semibold text-gray-900">One-time</h4>
-              <p className="mt-2">Support immediate relief and legal aid.</p>
-              <a href="/donations" className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary">Donate ₹500</a>
-            </div>
-            <div className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
-              <h4 className="font-semibold text-gray-900">Monthly</h4>
-              <p className="mt-2">Sustain long-term campaigns.</p>
-              <a href="/donations" className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary">Start ₹250 / mo</a>
-            </div>
-            <div className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
-              <h4 className="font-semibold text-gray-900">Corporate</h4>
-              <p className="mt-2">Partner with us for programs and CSR.</p>
-              <a href="/contact" className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary">Contact us</a>
-            </div>
-          </>
-        ) : events.map(ev=>{
+        ) : filteredEvents.length === 0 ? (
+          // Hide general donation fallback cards on landing page
+          <div className="col-span-full text-sm text-gray-600 italic">No donation events are available right now.</div>
+        ) : filteredEvents.map(ev=>{
           const goal = Number(ev.goalAmount || 0)
           const raised = Number(ev.collectedAmount || 0)
           const pct = goal > 0 ? Math.min(100, Math.round((raised/goal)*100)) : 0

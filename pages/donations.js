@@ -2,6 +2,7 @@ import Head from 'next/head'
 import Script from 'next/script'
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
+import SEOHead, { generateStructuredData } from '../components/SEOHead'
 import { getDonationEvents, getOrgSettings, createDonationOrder, confirmDonation } from '../lib/api'
 
 export default function DonationsPage(){
@@ -147,15 +148,7 @@ export default function DonationsPage(){
             console.log('[donations] /donations/confirm response:', confirm)
             setReceipt(confirm)
             setConfirmDebug({ request: reqBody, response: confirm })
-            // Open receipt HTML if provided by backend (prefer nested verify.htmlUrl)
-            const htmlUrl =
-              confirm?.htmlUrl ||
-              confirm?.data?.htmlUrl ||
-              confirm?.receipt?.htmlUrl ||
-              confirm?.receipt?.verify?.htmlUrl
-            if (htmlUrl) {
-              try { window.location.assign(htmlUrl) } catch (e) { /* noop */ }
-            }
+            // Note: Receipt HTML URL is available but we keep users on this page instead of auto-redirecting
           } catch (err){
             console.error(err)
             setError('Payment confirmation failed. Please contact support with your payment ID.')
@@ -186,10 +179,19 @@ export default function DonationsPage(){
 
   return (
     <>
-      <Head>
-        <title>Donate — Human Rights Council</title>
-        <meta name="description" content="Donate to support human rights work across India." />
-      </Head>
+      <SEOHead 
+        title="Donate"
+        description="Support HRCI's mission to protect human rights in India. Donate directly or contribute to specific events and programs."
+        canonical="/donations"
+        ogImage="/images/og-donations.png"
+      >
+        {generateStructuredData('DonateAction', {
+          recipient: {
+            '@type': 'Organization',
+            name: 'Human Rights Council for India (HRCI)'
+          }
+        })}
+      </SEOHead>
       {/* Razorpay SDK */}
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
 
@@ -381,14 +383,6 @@ export default function DonationsPage(){
                 <a href={htmlUrl} target="_blank" rel="noreferrer" className="mt-4 inline-flex items-center rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary">View full receipt</a>
               ) : null
             })()}
-            {confirmDebug && (
-              <details className="mt-4">
-                <summary className="cursor-pointer text-sm text-gray-700">Show /donations/confirm logs</summary>
-                <pre className="mt-2 overflow-auto rounded bg-gray-50 p-3 text-xs text-gray-800">
-{JSON.stringify(confirmDebug, null, 2)}
-                </pre>
-              </details>
-            )}
           </div>
         )}
       </main>

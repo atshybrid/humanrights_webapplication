@@ -1,0 +1,12 @@
+# Add these environment variables to your .env.local file:
+
+# Your website's public URL (important for SEO)
+NEXT_PUBLIC_SITE_URL=https://yourwebsite.com
+
+# Optional: Google Analytics ID for tracking
+# NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
+
+# Social media URLs (add to structured data)
+# NEXT_PUBLIC_FACEBOOK_URL=https://facebook.com/yourpage
+# NEXT_PUBLIC_TWITTER_URL=https://twitter.com/yourhandle
+# NEXT_PUBLIC_LINKEDIN_URL=https://linkedin.com/company/yourcompany

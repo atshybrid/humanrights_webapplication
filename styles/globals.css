@@ -23,3 +23,20 @@ body {
     color: white;
   }
 }
+
+/* Simple entrance animations for image reveals */
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Apply animation, respect reduced motion */
+.animate-fade-in-up {
+  animation: fade-in-up 700ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in-up {
+    animation: none !important;
+  }
+}

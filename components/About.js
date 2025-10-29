@@ -43,12 +43,12 @@ export default function About(){
         <div className="relative">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-3">
-              <ImageWithFallback src="https://images.unsplash.com/photo-1509098681029-b45e9c845022?q=80&w=1200&auto=format&fit=crop" alt="Community support" className="h-40 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm" />
-              <ImageWithFallback src="https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?q=80&w=1200&auto=format&fit=crop" alt="Rights awareness" className="h-48 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm" />
+              <ImageWithFallback src="https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/viteam.png" alt="Community support" className="h-40 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm will-change-transform transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up" style={{ animationDelay: '0ms' }} />
+              <ImageWithFallback src="https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/oldagehome.png" alt="Rights awareness" className="h-48 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm will-change-transform transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up" style={{ animationDelay: '120ms' }} />
             </div>
             <div className="mt-6 space-y-3">
-              <ImageWithFallback src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1200&auto=format&fit=crop" alt="Volunteers in action" className="h-48 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm" />
-              <ImageWithFallback src="https://images.unsplash.com/photo-1514826786317-59744fe2b1e5?q=80&w=1200&auto=format&fit=crop" alt="Legal support" className="h-40 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm" />
+              <ImageWithFallback src="https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/women_empower.png" alt="Volunteers in action" className="h-48 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm will-change-transform transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up" style={{ animationDelay: '240ms' }} />
+              <ImageWithFallback src="https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/rural_developement.png" alt="Legal support" className="h-40 w-full object-cover rounded-2xl ring-1 ring-gray-200 shadow-sm will-change-transform transition-transform duration-300 hover:scale-[1.01] animate-fade-in-up" style={{ animationDelay: '360ms' }} />
             </div>
           </div>
           <div className="absolute -bottom-4 -left-4 hidden sm:block h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-secondary opacity-80 blur-xl" />

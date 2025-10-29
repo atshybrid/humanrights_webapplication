@@ -15,6 +15,7 @@ export default function MobileBottomNav(){
   const path = router.pathname || ''
   const isMembers = path.startsWith('/members')
   const isDonations = path.startsWith('/donations')
+  const isDocuments = path.startsWith('/documents')
   const isContact = path.startsWith('/contact')
   const isHomeStories = path === '/' || path.startsWith('/stories')
 
@@ -40,19 +41,19 @@ export default function MobileBottomNav(){
               }
             />
             <NavItem
+              href="/documents"
+              label="Docs"
+              active={isDocuments}
+              icon={
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6"><path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z"/><path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z"/></svg>
+              }
+            />
+            <NavItem
               href="/#stories"
               label="Stories"
               active={isHomeStories}
               icon={
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6"><path d="M12 4.5c-1.657 0-3 1.343-3 3v4.086a1.5 1.5 0 0 0 .44 1.06l2.12 2.121 2.121-2.12A1.5 1.5 0 0 0 15 11.586V7.5c0-1.657-1.343-3-3-3Z"/><path d="M6 7.5A6 6 0 0 1 18 7.5v4.086a3 3 0 0 1-.879 2.121l-3.94 3.94a1.5 1.5 0 0 1-2.122 0l-3.94-3.94A3 3 0 0 1 6 11.586V7.5Z"/></svg>
-              }
-            />
-            <NavItem
-              href="/contact"
-              label="Contact"
-              active={isContact}
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6"><path d="M2.25 4.5A2.25 2.25 0 0 1 4.5 2.25h15a2.25 2.25 0 0 1 2.25 2.25v15a2.25 2.25 0 0 1-2.25 2.25h-15A2.25 2.25 0 0 1 2.25 19.5v-15Zm3 2.25a.75.75 0 0 0 0 1.5h13.5a.75.75 0 0 0 0-1.5H5.25Zm0 4.5a.75.75 0 0 0 0 1.5h13.5a.75.75 0 0 0 0-1.5H5.25Zm0 4.5a.75.75 0 0 0 0 1.5h8.25a.75.75 0 0 0 0-1.5H5.25Z"/></svg>
               }
             />
           </div>

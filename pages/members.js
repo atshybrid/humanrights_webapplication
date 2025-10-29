@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Head from 'next/head'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
+import SEOHead, { generateStructuredData } from '../components/SEOHead'
 import IndiaZonesMap from '../components/IndiaZonesMap'
 import dynamic from 'next/dynamic'
 const MapIndiaDrilldown = dynamic(() => import('../components/MapIndiaDrilldown'), { ssr: false })
@@ -265,9 +266,12 @@ export default function MembersPage(){
 
   return (
     <>
-      <Head>
-        <title>Members & Volunteers — HRCI</title>
-      </Head>
+      <SEOHead 
+        title="Members & Volunteers"
+        description="Explore HRCI's network of members and volunteers across India. Check seat availability and join our mission to protect human rights."
+        canonical="/members"
+        ogImage="/images/og-members.png"
+      />
       {/* Razorpay SDK */}
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       <main className="max-w-6xl mx-auto px-6 py-8">
