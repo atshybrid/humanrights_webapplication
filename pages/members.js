@@ -145,12 +145,12 @@ export default function MembersPage(){
   const canFetchMembers = useMemo(() => {
     if (!level) return false
     if (level === 'NATIONAL') return true
+    if (level === 'ZONE') return !!selectedCountryId // pass only country for zone
     if (level === 'STATE') return !!selectedStateId
     if (level === 'DISTRICT') return !!selectedStateId && !!selectedDistrictId
     if (level === 'MANDAL') return !!selectedStateId && !!selectedDistrictId && !!selectedMandalId
-    if (level === 'ZONE') return true // no zone filter supported in public members API spec
     return false
-  }, [level, selectedStateId, selectedDistrictId, selectedMandalId])
+  }, [level, selectedCountryId, selectedStateId, selectedDistrictId, selectedMandalId])
 
   useEffect(() => {
     if (!canFetchMembers) { setMembers([]); setMembersTotal(0); return }
@@ -158,6 +158,7 @@ export default function MembersPage(){
     setMembersError('')
     const params = {
       level,
+      hrcCountryId: selectedCountryId || undefined,
       hrcStateId: level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL' ? selectedStateId : undefined,
       hrcDistrictId: level === 'DISTRICT' || level === 'MANDAL' ? selectedDistrictId : undefined,
       hrcMandalId: level === 'MANDAL' ? selectedMandalId : undefined,
@@ -184,7 +185,6 @@ export default function MembersPage(){
         designationCode,
         level,
         hrcCountryId: selectedCountryId || undefined,
-        zone: level === 'ZONE' ? selectedZone : undefined,
         hrcStateId: level === 'STATE' ? selectedStateId : undefined,
         hrcDistrictId: level === 'DISTRICT' ? selectedDistrictId : undefined,
         hrcMandalId: level === 'MANDAL' ? selectedMandalId : undefined,
@@ -207,7 +207,6 @@ export default function MembersPage(){
   const buildLocationPayload = () => {
     const payload = { level }
     if (selectedCountryId) payload.hrcCountryId = selectedCountryId
-    if (level === 'ZONE') payload.zone = selectedZone
     if (level === 'STATE') payload.hrcStateId = selectedStateId
     if (level === 'DISTRICT') payload.hrcDistrictId = selectedDistrictId
     if (level === 'MANDAL') payload.hrcMandalId = selectedMandalId
@@ -480,7 +479,7 @@ export default function MembersPage(){
         <section className="mt-8">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-gray-900">Directory</h2>
-            <div className="text-sm text-gray-600">Level: {level}{level==='ZONE' && selectedZone? ` — ${selectedZone}`:''}</div>
+            <div className="text-sm text-gray-600">Level: {level}</div>
           </div>
           <p className="mt-1 text-sm text-gray-600">Members/Volunteers list will appear here. While the API is being prepared, you can filter locations and check seat availability above.</p>
 
