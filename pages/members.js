@@ -3,9 +3,7 @@ import Head from 'next/head'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
 import SEOHead, { generateStructuredData } from '../components/SEOHead'
-import IndiaZonesMap from '../components/IndiaZonesMap'
-import dynamic from 'next/dynamic'
-const MapIndiaDrilldown = dynamic(() => import('../components/MapIndiaDrilldown'), { ssr: false })
+import ImageWithFallback from '../components/ImageWithFallback'
 import { Skeleton } from '../components/Skeleton'
 import {
   getHrcCells,
@@ -16,6 +14,7 @@ import {
   getHrcDistricts,
   getHrcMandals,
   getMembershipAvailability,
+  getPublicMembers,
   createMembershipOrderPayfirst,
   confirmMembershipPayfirst,
 } from '../lib/api'
@@ -34,7 +33,6 @@ export default function MembersPage(){
   const [designationCode, setDesignationCode] = useState('')
 
   const [countries, setCountries] = useState([])
-  const [zones, setZones] = useState([])
   const [states, setStates] = useState([])
   const [districts, setDistricts] = useState([])
   const [mandals, setMandals] = useState([])
@@ -42,10 +40,18 @@ export default function MembersPage(){
   const [geoLoading, setGeoLoading] = useState(false)
 
   const [selectedCountryId, setSelectedCountryId] = useState('')
-  const [selectedZone, setSelectedZone] = useState('')
   const [selectedStateId, setSelectedStateId] = useState('')
   const [selectedDistrictId, setSelectedDistrictId] = useState('')
   const [selectedMandalId, setSelectedMandalId] = useState('')
+
+  // Members listing state
+  const [members, setMembers] = useState([])
+  const [membersTotal, setMembersTotal] = useState(0)
+  const [membersLoading, setMembersLoading] = useState(false)
+  const [membersError, setMembersError] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(24)
+  const [q, setQ] = useState('')
 
   const [availability, setAvailability] = useState(null)
   const [availabilityLoading, setAvailabilityLoading] = useState(false)
@@ -68,12 +74,12 @@ export default function MembersPage(){
     if (!activeCellId) return 'Select a cell'
     if (!designationCode) return 'Select a designation'
     if (level === 'NATIONAL') return null
-    if (level === 'ZONE' && !selectedZone) return 'Select a zone'
+    // Zone selection is not required (API does not accept a zone filter)
     if (level === 'STATE' && !selectedStateId) return 'Select a state'
     if (level === 'DISTRICT' && !selectedDistrictId) return 'Select a district'
     if (level === 'MANDAL' && !selectedMandalId) return 'Select a mandal'
     return null
-  }, [activeCellId, designationCode, level, selectedZone, selectedStateId, selectedDistrictId, selectedMandalId])
+  }, [activeCellId, designationCode, level, selectedStateId, selectedDistrictId, selectedMandalId])
   const canCheck = !availabilityLoading && !requiredHint
 
   useEffect(() => {
@@ -90,9 +96,8 @@ export default function MembersPage(){
       setDesignations(sorted)
     }).finally(()=> setDesignationsLoading(false))
 
-    Promise.all([getHrcCountries(), getHrcZones()]).then(([c, z])=>{
+    Promise.all([getHrcCountries()]).then(([c])=>{
       setCountries(c)
-      setZones(z)
       const india = c?.find(x=> x.code === 'IN')
       if (india) setSelectedCountryId(india.id)
     })
@@ -122,11 +127,6 @@ export default function MembersPage(){
   // Reset deeper selections when level changes
   useEffect(() => {
     if (level === 'NATIONAL') {
-      setSelectedZone('')
-      setSelectedStateId('')
-      setSelectedDistrictId('')
-      setSelectedMandalId('')
-    } else if (level === 'ZONE') {
       setSelectedStateId('')
       setSelectedDistrictId('')
       setSelectedMandalId('')
@@ -136,12 +136,43 @@ export default function MembersPage(){
     } else if (level === 'DISTRICT') {
       setSelectedMandalId('')
     }
+    setPage(1)
   }, [level])
 
-  const filteredStates = useMemo(() => {
-    if (!selectedZone) return states
-    return (states||[]).filter(s => s.zone === selectedZone)
-  }, [states, selectedZone])
+  const filteredStates = states
+
+  // When filters change, fetch members (only when required selections are satisfied)
+  const canFetchMembers = useMemo(() => {
+    if (!level) return false
+    if (level === 'NATIONAL') return true
+    if (level === 'STATE') return !!selectedStateId
+    if (level === 'DISTRICT') return !!selectedStateId && !!selectedDistrictId
+    if (level === 'MANDAL') return !!selectedStateId && !!selectedDistrictId && !!selectedMandalId
+    if (level === 'ZONE') return true // no zone filter supported in public members API spec
+    return false
+  }, [level, selectedStateId, selectedDistrictId, selectedMandalId])
+
+  useEffect(() => {
+    if (!canFetchMembers) { setMembers([]); setMembersTotal(0); return }
+    setMembersLoading(true)
+    setMembersError('')
+    const params = {
+      level,
+      hrcStateId: level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL' ? selectedStateId : undefined,
+      hrcDistrictId: level === 'DISTRICT' || level === 'MANDAL' ? selectedDistrictId : undefined,
+      hrcMandalId: level === 'MANDAL' ? selectedMandalId : undefined,
+      q: q || undefined,
+      page,
+      pageSize
+    }
+    getPublicMembers(params)
+      .then(data => {
+        setMembers(data?.items || [])
+        setMembersTotal(Number(data?.total || 0))
+      })
+      .catch(()=> setMembersError('Unable to load members.'))
+      .finally(()=> setMembersLoading(false))
+  }, [level, selectedStateId, selectedDistrictId, selectedMandalId, q, page, pageSize, canFetchMembers])
 
   const onCheckAvailability = async () => {
     setAvailability(null)
@@ -289,7 +320,7 @@ export default function MembersPage(){
           ))}
         </div>
 
-        {/* Cells tabs */}
+        {/* Cells tabs (keep simple pick, no map) */}
         <div className="mt-4 flex flex-wrap gap-2">
           {cellsLoading ? (
             <>
@@ -306,170 +337,106 @@ export default function MembersPage(){
           )}
         </div>
 
-        {/* Filters row */}
+        {/* Filters row - no map, just selectors */}
         <section className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Map / visual */}
+          {/* Filters and Members list */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl bg-white ring-1 ring-gray-200 shadow-sm p-4">
-              {(level === 'NATIONAL' || level === 'ZONE' || level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL') ? (
-                <div className="space-y-4">
-                  <MapIndiaDrilldown
-                    countryId={selectedCountryId}
-                    level={level}
-                    selectedZone={selectedZone}
-                    selectedStateId={selectedStateId}
-                    setSelectedStateId={setSelectedStateId}
-                    selectedDistrictId={selectedDistrictId}
-                    setSelectedDistrictId={setSelectedDistrictId}
-                    selectedMandalId={selectedMandalId}
-                    setSelectedMandalId={setSelectedMandalId}
-                    statesList={states}
-                  />
-                  <div className="text-xs text-gray-600">Tip: Click a state to drill into districts; click a district to drill into mandals. Use the +/− to zoom and Reset to go back.</div>
-                  {/* Map-wise list synced to current level/selection */}
-                  <div className="rounded-xl ring-1 ring-gray-200 bg-gray-50 p-3">
-                    <p className="text-sm font-semibold text-gray-800">Map-wise list</p>
-                    <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-auto">
-                      {level === 'ZONE' && (
-                        (zones||[]).map(z => (
-                          <button
-                            key={z}
-                            onClick={()=> setSelectedZone(z)}
-                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedZone===z? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
-                          >{z}</button>
-                        ))
-                      )}
-                      {(level === 'STATE') && (
-                        (filteredStates||[]).map(s => (
-                          <button
-                            key={s.id}
-                            onClick={()=> setSelectedStateId(s.id)}
-                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedStateId===s.id? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
-                          >{s.name}</button>
-                        ))
-                      )}
-                      {(level === 'DISTRICT') && (
-                        (districts||[]).map(d => (
-                          <button
-                            key={d.id}
-                            onClick={()=> setSelectedDistrictId(d.id)}
-                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedDistrictId===d.id? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
-                          >{d.name}</button>
-                        ))
-                      )}
-                      {(level === 'MANDAL') && (
-                        (mandals||[]).map(m => (
-                          <button
-                            key={m.id}
-                            onClick={()=> setSelectedMandalId(m.id)}
-                            className={`text-left rounded-lg px-3 py-2 text-sm ring-1 transition ${selectedMandalId===m.id? 'bg-white ring-primary/40 text-gray-900' : 'bg-white ring-gray-200 hover:ring-gray-300'}`}
-                          >{m.name}</button>
-                        ))
-                      )}
-                      {level === 'NATIONAL' && (
-                        <div className="text-xs text-gray-600">Switch to Zone/State/District/Mandal to see lists.</div>
-                      )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {level !== 'NATIONAL' && (
+                  <div>
+                    <label className="text-xs text-gray-500">Country</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedCountryId} onChange={e=> setSelectedCountryId(e.target.value)}>
+                      <option value="">Select</option>
+                      {(countries||[]).map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                {(level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL') && (
+                  <div>
+                    <label className="text-xs text-gray-500">State</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedStateId} onChange={e=> { setSelectedStateId(e.target.value); setPage(1) }}>
+                      <option value="">Select</option>
+                      {(filteredStates||[]).map(s=> <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                {(level === 'DISTRICT' || level === 'MANDAL') && (
+                  <div>
+                    <label className="text-xs text-gray-500">District</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> { setSelectedDistrictId(e.target.value); setPage(1) }}>
+                      <option value="">Select</option>
+                      {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                {level === 'MANDAL' && (
+                  <div>
+                    <label className="text-xs text-gray-500">Mandal</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> { setSelectedMandalId(e.target.value); setPage(1) }}>
+                      <option value="">Select</option>
+                      {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                <div>
+                  <label className="text-xs text-gray-500">Search</label>
+                  <input value={q} onChange={(e)=> { setQ(e.target.value); setPage(1) }} placeholder="Name or mobile" className="mt-1 w-full rounded-lg border-gray-300 px-3 py-2 text-sm" />
+                </div>
+              </div>
+
+              {/* Selection chips */}
+              <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                {selectedState ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">State: {selectedState.name}</span> : null}
+                {selectedDistrict ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">District: {selectedDistrict.name}</span> : null}
+                {selectedMandal ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">Mandal: {selectedMandal.name}</span> : null}
+              </div>
+            </div>
+
+            {/* Members grid */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900">Directory</h2>
+                <div className="text-sm text-gray-600">Level: {level}</div>
+              </div>
+              {membersLoading ? (
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[...Array(6)].map((_,i)=> <Skeleton key={i} className="h-40 w-full rounded-2xl" />)}
+                </div>
+              ) : membersError ? (
+                <div className="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800">{membersError}</div>
+              ) : members.length === 0 ? (
+                <div className="mt-4 text-sm text-gray-600">No members found for the selected filters.</div>
+              ) : (
+                <>
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {members.map((m, idx) => (
+                      <div key={idx} className="rounded-2xl ring-1 ring-gray-200 bg-white p-4 shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <ImageWithFallback src={m.profilePhotoUrl || '/images/hero-placeholder.svg'} alt={m.memberName} className="h-14 w-14 rounded-full object-cover ring-1 ring-gray-200" />
+                          <div className="min-w-0">
+                            <p className="font-semibold text-gray-900 truncate">{m.memberName}</p>
+                            <p className="text-xs text-gray-600 truncate">{m.designationName} • {m.level}</p>
+                            <p className="text-xs text-gray-600 truncate">{m.cellName}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  <div className="mt-4 flex items-center justify-between text-sm text-gray-700">
+                    <div>
+                      Page {page} • {members.length} of {membersTotal}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button disabled={page<=1} onClick={()=> setPage(p=> Math.max(1, p-1))} className="px-3 py-1.5 rounded border border-gray-300 disabled:opacity-50">Prev</button>
+                      <button disabled={(page*pageSize)>=membersTotal} onClick={()=> setPage(p=> p+1)} className="px-3 py-1.5 rounded border border-gray-300 disabled:opacity-50">Next</button>
                     </div>
                   </div>
-                  {/* Controls under map */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {level === 'ZONE' && (
-                      <div>
-                        <label className="text-xs text-gray-500">Zone</label>
-                        <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedZone} onChange={e=> setSelectedZone(e.target.value)}>
-                          <option value="">Select</option>
-                          {(zones||[]).map(z=> <option key={z} value={z}>{z}</option>)}
-                        </select>
-                      </div>
-                    )}
-                    {(level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL') && (
-                      <>
-                        <div>
-                          <label className="text-xs text-gray-500">State</label>
-                          <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedStateId} onChange={e=> setSelectedStateId(e.target.value)}>
-                            <option value="">Select</option>
-                            {(filteredStates||[]).map(s=> <option key={s.id} value={s.id}>{s.name}</option>)}
-                          </select>
-                        </div>
-                        {(level === 'DISTRICT' || level === 'MANDAL') && (
-                          <div>
-                            <label className="text-xs text-gray-500">District</label>
-                            <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> setSelectedDistrictId(e.target.value)}>
-                              <option value="">Select</option>
-                              {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
-                            </select>
-                          </div>
-                        )}
-                        {level === 'MANDAL' && (
-                          <div>
-                            <label className="text-xs text-gray-500">Mandal</label>
-                            <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> setSelectedMandalId(e.target.value)}>
-                              <option value="">Select</option>
-                              {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
-                            </select>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {/* Selection chips */}
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    {level === 'ZONE' && selectedZone ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">Zone: {selectedZone}</span> : null}
-                    {selectedState ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">State: {selectedState.name}</span> : null}
-                    {selectedDistrict ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">District: {selectedDistrict.name}</span> : null}
-                    {selectedMandal ? <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 ring-1 ring-gray-200">Mandal: {selectedMandal.name}</span> : null}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-sm text-gray-600">
-                  <p className="font-semibold">Location selection</p>
-                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {level !== 'NATIONAL' && (
-                      <div>
-                        <label className="text-xs text-gray-500">Country</label>
-                        <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedCountryId} onChange={e=> setSelectedCountryId(e.target.value)}>
-                          <option value="">Select</option>
-                          {(countries||[]).map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
-                      </div>
-                    )}
-                    {level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL' ? (
-                      <div>
-                        <label className="text-xs text-gray-500">State</label>
-                        <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedStateId} onChange={e=> setSelectedStateId(e.target.value)}>
-                          <option value="">Select</option>
-                          {(filteredStates||[]).map(s=> <option key={s.id} value={s.id}>{s.name}</option>)}
-                        </select>
-                      </div>
-                    ) : null}
-                    {level === 'DISTRICT' || level === 'MANDAL' ? (
-                      <div>
-                        <label className="text-xs text-gray-500">District</label>
-                        <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> setSelectedDistrictId(e.target.value)}>
-                          <option value="">Select</option>
-                          {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
-                        </select>
-                      </div>
-                    ) : null}
-                    {level === 'MANDAL' ? (
-                      <div>
-                        <label className="text-xs text-gray-500">Mandal</label>
-                        <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> setSelectedMandalId(e.target.value)}>
-                          <option value="">Select</option>
-                          {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
-                        </select>
-                      </div>
-                    ) : null}
-                  </div>
-                  {geoLoading ? <div className="mt-3"><Skeleton className="h-5 w-40" /></div> : null}
-                </div>
+                </>
               )}
             </div>
-                  {canJoin ? (
-                    <div className="mt-3">
-                      <button onClick={()=> setJoinOpen(true)} className="inline-flex items-center rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary">Join as member</button>
-                    </div>
-                  ) : null}
           </div>
 
           {/* Availability & designation */}
