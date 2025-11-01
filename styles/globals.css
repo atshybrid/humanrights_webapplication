@@ -40,3 +40,15 @@ body {
     animation: none !important;
   }
 }
+
+/* Print-ready ID Card helpers */
+.idcard-mm { width: 85.6mm; height: 54mm; }
+.idcard-mm-portrait { width: 54mm; height: 85.6mm; }
+.idcard-scale { transform-origin: top left; }
+
+@media print {
+  @page { margin: 0; }
+  /* Remove on-screen scaling when printing */
+  .idcard-scale { transform: none !important; }
+  body { background: #ffffff !important; }
+}
