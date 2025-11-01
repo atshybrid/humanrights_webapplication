@@ -72,6 +72,9 @@ export default function IdCardFrontSSR({ member, orgName, tagline, logoUrl, stam
           signUrl={signUrl}
           gradientStart={gradientStart}
           gradientEnd={gradientEnd}
+          noHeader={true}
+          noFooterAccent={true}
+          minimal={true}
           member={member}
         />
       </div>
