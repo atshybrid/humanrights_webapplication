@@ -3,6 +3,7 @@ import Head from 'next/head'
 import Link from 'next/link'
 
 const PLAY_URL = process.env.NEXT_PUBLIC_KHABARX_PLAY_URL || 'https://play.google.com/store/search?q=Khabarx&c=apps'
+const APK_URL = process.env.NEXT_PUBLIC_APK_URL || ''
 
 export default function MembershipSuccess(){
   const [data, setData] = useState(null)
@@ -48,6 +49,11 @@ export default function MembershipSuccess(){
                 <a href={PLAY_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary">
                   Get the app on Play Store
                 </a>
+                {APK_URL ? (
+                  <a href={APK_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
+                    Download APK
+                  </a>
+                ) : null}
                 <Link href="/members" className="inline-flex items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-50">
                   Check other seats
                 </Link>
@@ -68,7 +74,7 @@ export default function MembershipSuccess(){
           <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">What’s next?</h2>
             <ul className="mt-3 list-disc pl-5 text-sm text-gray-700 space-y-1">
-              <li>Install the Khabarx mobile app and log in with your mobile number.</li>
+              <li>Install the Khabarx mobile app and log in with your mobile number. {APK_URL ? 'You can also download the APK directly.' : ''}</li>
               <li>Complete your registration if prompted to activate your membership.</li>
               <li>Explore other roles or levels anytime and check seat availability.</li>
             </ul>
