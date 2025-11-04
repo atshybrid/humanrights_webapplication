@@ -468,6 +468,21 @@ export default function MembersPage(){
                       <span className="text-gray-500">Fee</span><span className="font-semibold">{availability.fee != null ? `₹${availability.fee}` : '—'}</span>
                       <span className="text-gray-500">Validity</span><span className="font-semibold">{availability.validityDays ? `${availability.validityDays} days` : '—'}</span>
                     </div>
+                    {/* Join CTA */}
+                    <div className="mt-3">
+                      {Number(availability?.remaining || 0) > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setJoinOpen(true)}
+                          disabled={!canJoin}
+                          className="inline-flex items-center justify-center rounded-full bg-secondary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-60"
+                        >
+                          Join & pay
+                        </button>
+                      ) : (
+                        <p className="text-xs text-red-600">No seats available for this selection.</p>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
