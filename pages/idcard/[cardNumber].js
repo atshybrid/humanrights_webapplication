@@ -1,4 +1,5 @@
 import MemberIdCardFront from '../../components/MemberIdCardFront'
+import IdCardExactFront from '../../components/IdCardExactFront'
 import { getHRCIIdCard } from '../../lib/api'
 
 export async function getServerSideProps({ params }) {
@@ -49,7 +50,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tagline, logoUrl, stampUrl, signUrl, gradientStart, gradientEnd }){
+export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tagline, logoUrl, stampUrl, signUrl, gradientStart, gradientEnd, qrUrl }){
   async function downloadJpg(){
     try{
       const node = document.getElementById('idcard-capture')
@@ -91,20 +92,20 @@ export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tag
         ) : null}
         
         <div id="idcard-capture">
-          <MemberIdCardFront
-            // minimal + portrait mm sizing are defaults in component
-            orgName={orgName}
-            tagline={tagline}
+          {/* Exact print design version */}
+          <IdCardExactFront
             logoUrl={logoUrl}
+            qrUrlFront={qrUrl || ''}
+            cellName={member?.level || ''}
+            memberName={member?.name || ''}
+            designation={member?.designation || ''}
+            idNumber={member?.memberId || ''}
+            contactNumber={member?.phone || ''}
+            validUpto={member?.validity?.replace('Valid Thru: ','') || ''}
+            issueDate={''}
             photoUrl={''}
-            stampUrl={stampUrl}
-            signUrl={signUrl}
-            gradientStart={gradientStart}
-            gradientEnd={gradientEnd}
-            noHeader={true}
-            noFooterAccent={true}
-            minimal={true}
-            member={member}
+            stampUrl={stampUrl || ''}
+            authorSignUrl={signUrl || ''}
           />
         </div>
       </div>

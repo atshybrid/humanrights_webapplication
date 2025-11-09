@@ -1,4 +1,5 @@
 import MemberIdCardBack from '../../../components/MemberIdCardBack'
+import IdCardExactBack from '../../../components/IdCardExactBack'
 import { getHRCIIdCard } from '../../../lib/api'
 
 export async function getServerSideProps({ params }) {
@@ -70,13 +71,18 @@ export default function IdCardBackSSR({ error, qrUrl, contact, address, notes, c
         ) : null}
 
         <div id="idcard-capture">
-          <MemberIdCardBack
-            // Defaults: minimal + portrait mm sizing
-            qrUrl={qrUrl || undefined}
-            barcodeUrl={undefined}
-            contact={contact}
-            address={address}
-            notes={notes}
+          {/* Exact print design back version */}
+          <IdCardExactBack
+            qrUrlBack={qrUrl || ''}
+            registrationLines={[]}
+            termsLines={[]}
+            headOfficeAddress={contact?.replace('Head Office: ','') || ''}
+            regionalOfficeAddress={''}
+            administrationOfficeAddress={''}
+            website={''}
+            secondLogoUrl={''}
+            contactNumber1={''}
+            contactNumber2={''}
           />
         </div>
       </div>
