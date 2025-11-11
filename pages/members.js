@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
 import Head from 'next/head'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
@@ -420,7 +419,7 @@ export default function MembersPage(){
                             <div className="flex items-center gap-3">
                               <ImageWithFallback src={m.profilePhotoUrl || '/images/hero-placeholder.svg'} alt={m.memberName} className="h-16 w-16 rounded-full object-cover ring-2 ring-white shadow" />
                               <div className="min-w-0">
-                                <p className="font-semibold text-gray-900 leading-snug">{m.memberName}</p>
+                                <p className="font-semibold text-white leading-snug">{m.memberName}</p>
                                 <div className="mt-0.5 flex flex-wrap items-center gap-1 text-[11px] text-gray-600">
                                   <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 ring-1 ring-gray-200">{m.designationName}</span>
                                   <span>•</span>
@@ -429,18 +428,10 @@ export default function MembersPage(){
                                 {m.cellName ? <p className="text-xs text-gray-600 mt-0.5">{m.cellName}</p> : null}
                               </div>
                             </div>
-                            <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
+                            <div className="mt-3 flex items-center text-xs text-gray-600">
                               {m.mobileNumber ? (
                                 <span className="inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path d="M2 3.5A1.5 1.5 0 013.5 2h2A1.5 1.5 0 017 3.5V5A1.5 1.5 0 015.5 6h-2A1.5 1.5 0 012 4.5v-1zM2 9.5A1.5 1.5 0 013.5 8h2A1.5 1.5 0 017 9.5V11a1.5 1.5 0 01-1.5 1.5h-2A1.5 1.5 0 012 10.5v-1zM2 15.5A1.5 1.5 0 013.5 14h2A1.5 1.5 0 017 15.5V17A1.5 1.5 0 015.5 18h-2A1.5 1.5 0 012 16.5v-1zM9 4a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1zM9 10a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1zM9 16a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1z"/></svg>{m.mobileNumber}</span>
-                              ) : <span/>}
-                              {href ? (
-                                <Link href={href} className="inline-flex items-center gap-1 text-primary hover:underline">
-                                  View Profile
-                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
-                                </Link>
-                              ) : (
-                                <span className="text-gray-400">Profile unavailable</span>
-                              )}
+                              ) : null}
                             </div>
                           </div>
                         </div>
