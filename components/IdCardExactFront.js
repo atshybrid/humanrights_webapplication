@@ -11,6 +11,7 @@ export default function IdCardExactFront({
   photoUrl = '',
   stampUrl = '',
   authorSignUrl = '',
+  watermarkUrl = '',
 }){
   return (
     <div>
@@ -21,7 +22,8 @@ export default function IdCardExactFront({
         .card { width: 85.6mm; height: 54mm; background: #fff; border-radius: 0mm; box-shadow: 0 0 5px rgba(0,0,0,0.2); overflow: hidden; font-family: 'Poppins', sans-serif; position: relative; }
         .strip-top { background: #FE0002; height: 6.35mm; color: #fff; display: flex; justify-content: center; align-items: center; font-weight: 700; text-transform: uppercase; font-size: 9pt; }
         .strip-blue { background: #1D0DA1; height: 6.35mm; color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 4.5pt; line-height: 1.05; font-weight: 600; text-transform: uppercase; padding-top: 0.2mm; }
-        .center { display: flex; justify-content: space-between; align-items: flex-start; height: 36.7mm; padding: 2mm; position: relative; }
+  .center { display: flex; justify-content: space-between; align-items: flex-start; height: 36.7mm; padding: 2mm; position: relative; }
+  .watermark{position:absolute;top:55%;left:50%;transform:translate(-50%,-50%);width:30mm;height:30mm;opacity:0.3;pointer-events:none;z-index:1;object-fit:contain;filter: sepia(1) saturate(5) hue-rotate(10deg) brightness(1.05) contrast(1.1);}        
         .left { width: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
         .left img { width: 13mm; margin-bottom: 2mm; display: block; }
         .middle { flex: 1; padding: 0 1mm; font-size: 4.8pt; line-height: 1.3; box-sizing: border-box; }
@@ -52,11 +54,13 @@ export default function IdCardExactFront({
           TO PROTECT & PROMOTE THE HUMAN RIGHTS
         </div>
         <div className="center">
-          <div className="left">
+          {/* watermark behind content */}
+          {watermarkUrl ? <img className="watermark" src={watermarkUrl} alt="watermark" /> : null}
+          <div className="left" style={{zIndex:2}}>
             {logoUrl ? <img src={logoUrl} alt="Logo" /> : null}
             {qrUrlFront ? <img src={qrUrlFront} alt="QR Code" /> : null}
           </div>
-          <div className="middle">
+          <div className="middle" style={{zIndex:2}}>
             <span className="jurisdiction">ALL INDIA JURISDICTION</span>
             <span className="regd">REGD BY GOVT OF NITI AAYOG</span>
             <span className="unique">UNIQUE ID: AP/2022/0324217, AP/2022/0326782</span>
@@ -72,11 +76,11 @@ export default function IdCardExactFront({
               <div><span className="label">Valid Upto</span><span className="colon">:</span><span id="validUptoValue" className="value">{validUpto || '-'}</span></div>
             </div>
           </div>
-          <div className="right">
+          <div className="right" style={{zIndex:2}}>
             {photoUrl ? <img className="member-photo" src={photoUrl} alt="Member Photo" /> : <div className="member-photo" />}
             {authorSignUrl ? <img className="sign-img" src={authorSignUrl} alt="Authorized Signature" /> : null}
             <div className="signature-text">Signature Auth.</div>
-            {stampUrl ? <img className="stamp" src={stampUrl} alt="HRCI Stamp" /> : null}
+            {stampUrl ? <img className="stamp" src={stampUrl} alt="HRCI Stamp" style={{top:'-3mm', left:'-3mm', bottom:'auto'}} /> : null}
           </div>
         </div>
         <div className="strip-bottom">We take help 24x7 From (Police, CBI, Vigilance, NIA) & other Govt. Dept. Against Crime & Corruption.</div>

@@ -10,23 +10,23 @@ export async function getServerSideProps({ params }) {
       return { props: { error: 'Card not found', cardNumber } }
     }
 
-    const { card, setting, verifyUrl, qrUrl } = data
-    const headOfficeAddress = setting?.headOfficeAddress || ''
-    const regionalOfficeAddress = setting?.regionalOfficeAddress || ''
-    const administrationOfficeAddress = setting?.administrationOfficeAddress || ''
-    const website = setting?.website || setting?.siteUrl || ''
-    const secondLogoUrl = (setting?.secondLogoUrl || setting?.frontLogoUrl) || ''
-    const contactNumbers = [setting?.helpLineNumber1, setting?.helpLineNumber2].filter(Boolean)
+  const { card, setting, verifyUrl, qrUrl } = data
+  const headOfficeAddress = setting?.headOfficeAddress || card?.headOfficeAddress || ''
+  const regionalOfficeAddress = setting?.regionalOfficeAddress || card?.regionalOfficeAddress || ''
+  const administrationOfficeAddress = setting?.administrationOfficeAddress || card?.administrationOfficeAddress || ''
+  const website = setting?.website || setting?.siteUrl || card?.website || ''
+  const secondLogoUrl = (setting?.secondLogoUrl || setting?.frontLogoUrl || card?.secondLogoUrl || card?.frontLogoUrl) || ''
+  const contactNumbers = [setting?.helpLineNumber1, setting?.helpLineNumber2, card?.helpLineNumber1, card?.helpLineNumber2].filter(Boolean)
     const contactNumber1 = contactNumbers[0] || ''
     const contactNumber2 = contactNumbers[1] || ''
-    const watermarkUrl = setting?.watermarkUrl || 'https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/string.png'
-    const registrationLines = setting?.registrationLines || []
-    const termsLines = setting?.termsLines || []
+  const watermarkUrl = setting?.backWatermarkUrl || setting?.watermarkUrl || card?.watermarkUrl || 'https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/string.png'
+  const registrationLines = setting?.registrationLines || card?.registrationLines || []
+  const termsLines = setting?.termsLines || card?.termsLines || []
 
     return {
       props: {
         cardNumber,
-        qrUrl: qrUrl || null,
+  qrUrl: (qrUrl || card?.qrUrlBack || card?.qrBack || card?.qrCodeUrl || null),
         headOfficeAddress,
         regionalOfficeAddress,
         administrationOfficeAddress,

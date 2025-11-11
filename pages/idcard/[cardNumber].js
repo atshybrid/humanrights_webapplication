@@ -23,14 +23,16 @@ export async function getServerSideProps({ params }) {
       workPlace: card.workPlace || card.workplace || [card.stateName, card.districtName, card.mandalName].filter(Boolean).join(', ')
     }
 
-    const orgName = (setting && (setting.frontH1 || setting.name)) || 'Human Rights Council for India'
-    const tagline = (setting && (setting.frontH2 || setting.headOfficeAddress)) || ''
-    const logoUrl = (setting && (setting.frontLogoUrl || setting.secondLogoUrl)) || '/images/logo.svg'
-    const stampUrl = (setting && setting.hrciStampUrl) || ''
-    const signUrl = (setting && setting.authorSignUrl) || ''
-    const gradientStart = (setting && setting.primaryColor) || '#FE0002'
-    const gradientEnd = (setting && setting.secondaryColor) || '#1D0DA1'
-    const photoUrl = card.photoUrl || card.profilePhotoUrl || ''
+  const orgName = (setting && (setting.frontH1 || setting.name)) || 'Human Rights Council for India'
+  const tagline = (setting && (setting.frontH2 || setting.headOfficeAddress)) || ''
+  const logoUrl = (setting?.frontLogoUrl || card?.frontLogoUrl || setting?.secondLogoUrl || card?.secondLogoUrl || '/images/logo.svg')
+  const stampUrl = (card?.hrciStampUrl || setting?.hrciStampUrl || card?.stampUrl || '')
+  const signUrl = (card?.authorSignUrl || setting?.authorSignUrl || card?.signatureUrl || '')
+  const gradientStart = (setting && setting.primaryColor) || '#FE0002'
+  const gradientEnd = (setting && setting.secondaryColor) || '#1D0DA1'
+  const photoUrl = card.photoUrl || card.profilePhotoUrl || card.photo || ''
+  const qr = qrUrl || card?.qrUrlFront || card?.qrFront || card?.qrCodeUrl || null
+  const watermarkUrl = setting?.frontWatermarkUrl || setting?.watermarkUrl || card?.watermarkUrl || 'https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/string.png'
 
     return {
       props: {
@@ -44,8 +46,9 @@ export async function getServerSideProps({ params }) {
         gradientStart,
         gradientEnd,
         verifyUrl: verifyUrl || null,
-        qrUrl: qrUrl || null,
+        qrUrl: qr,
         photoUrl,
+        watermarkUrl,
       }
     }
   } catch (e) {
@@ -53,7 +56,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tagline, logoUrl, stampUrl, signUrl, gradientStart, gradientEnd, qrUrl, photoUrl }){
+export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tagline, logoUrl, stampUrl, signUrl, gradientStart, gradientEnd, qrUrl, photoUrl, watermarkUrl }){
   async function downloadJpg(){
     try{
       const node = document.getElementById('idcard-capture')
@@ -109,6 +112,7 @@ export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tag
             photoUrl={photoUrl || ''}
             stampUrl={stampUrl || ''}
             authorSignUrl={signUrl || ''}
+            watermarkUrl={watermarkUrl || ''}
           />
         </div>
       </div>
