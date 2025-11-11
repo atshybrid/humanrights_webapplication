@@ -10,7 +10,8 @@ export async function getServerSideProps({ params }) {
       return { props: { error: 'Card not found', cardNumber } }
     }
 
-    const { card, setting, verifyUrl, qrUrl } = data
+  // Preserve entire payload for root-level fields
+  const { card, setting, verifyUrl, qrUrl, frontLogoUrl: rootFrontLogoUrl } = data || {}
     // Map fields for the component
     const member = {
       name: card.fullName || '',
@@ -25,7 +26,15 @@ export async function getServerSideProps({ params }) {
 
   const orgName = (setting && (setting.frontH1 || setting.name)) || 'Human Rights Council for India'
   const tagline = (setting && (setting.frontH2 || setting.headOfficeAddress)) || ''
-  const logoUrl = (setting?.frontLogoUrl || card?.frontLogoUrl || setting?.secondLogoUrl || card?.secondLogoUrl || '/images/logo.svg')
+    // Robust logo resolution order (root-level > setting > card fallbacks)
+    const logoUrl = (
+      rootFrontLogoUrl ||
+      setting?.frontLogoUrl ||
+      card?.frontLogoUrl ||
+      setting?.secondLogoUrl ||
+      card?.secondLogoUrl ||
+      '/images/logo.svg'
+    )
   const stampUrl = (card?.hrciStampUrl || setting?.hrciStampUrl || card?.stampUrl || '')
   const signUrl = (card?.authorSignUrl || setting?.authorSignUrl || card?.signatureUrl || '')
   const gradientStart = (setting && setting.primaryColor) || '#FE0002'
