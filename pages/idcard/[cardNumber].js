@@ -81,61 +81,12 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function IdCardFrontBackPage({ error, cardNumber, member, logoUrl, stampUrl, signUrl, photoUrl, qrFront, watermarkFrontUrl, qrBack, headOfficeAddress, regionalOfficeAddress, administrationOfficeAddress, website, secondLogoUrl, contactNumber1, contactNumber2, watermarkBackUrl, registrationLines, termsLines }){
-  async function downloadFrontJpg(){
-    try{
-      const node = document.getElementById('idcard-front')
-      if(!node) return
-      const { toJpeg } = await import('html-to-image')
-      const dataUrl = await toJpeg(node, { quality: 0.98, pixelRatio: 2 })
-      const link = document.createElement('a')
-      link.download = `${cardNumber || 'idcard'}-front.jpg`
-      link.href = dataUrl
-      link.click()
-    }catch(e){
-      console.error('Download failed', e)
-    }
-  }
-  async function downloadBackJpg(){
-    try{
-      const node = document.getElementById('idcard-back')
-      if(!node) return
-      const { toJpeg } = await import('html-to-image')
-      const dataUrl = await toJpeg(node, { quality: 0.98, pixelRatio: 2 })
-      const link = document.createElement('a')
-      link.download = `${cardNumber || 'idcard'}-back.jpg`
-      link.href = dataUrl
-      link.click()
-    }catch(e){
-      console.error('Download failed', e)
-    }
-  }
-  function handlePrintBoth(){
-    // Print both by opening a new window with combined markup
-    const front = document.getElementById('idcard-front')?.innerHTML || ''
-    const back = document.getElementById('idcard-back')?.innerHTML || ''
-    const w = window.open('', '_blank')
-    if(!w) return
-    w.document.write('<html><head><title>Print ID Cards</title><style>@page{size:auto;margin:6mm} body{font-family:Poppins,sans-serif;display:flex;flex-wrap:wrap;gap:12mm;justify-content:center;padding:12mm;background:#f0f0f0;} .wrap{box-shadow:0 0 6px rgba(0,0,0,.25);}</style></head><body>')
-    w.document.write(`<div class="wrap">${front}</div>`)
-    w.document.write(`<div class="wrap">${back}</div>`)
-    w.document.write('</body></html>')
-    w.document.close()
-    w.focus()
-    setTimeout(()=> { try { w.print(); } catch(_){} }, 300)
-  }
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 via-white to-gray-200 py-10 font-[Poppins]">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">Member ID Card{member?.name ? ` — ${member.name}` : ''}</h1>
-            <p className="text-sm text-gray-600 mt-1">Front & Back combined view. Use actions to print or download high quality images.</p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button onClick={handlePrintBoth} className="inline-flex items-center rounded-full bg-indigo-600 text-white px-4 py-2 text-sm font-semibold shadow hover:bg-indigo-700">Print Both</button>
-            <button onClick={downloadFrontJpg} className="inline-flex items-center rounded-full bg-slate-700 text-white px-4 py-2 text-sm font-semibold shadow hover:bg-slate-800">Front JPG</button>
-            <button onClick={downloadBackJpg} className="inline-flex items-center rounded-full bg-slate-700 text-white px-4 py-2 text-sm font-semibold shadow hover:bg-slate-800">Back JPG</button>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">Member ID Card{member?.name ? ` — ${member.name}` : ''}</h1>
+          <p className="text-sm text-gray-600 mt-1">Front & Back combined view.</p>
         </div>
         {error ? (
           <div className="mb-4 rounded-md bg-red-50 text-red-700 px-4 py-3 border border-red-200">
