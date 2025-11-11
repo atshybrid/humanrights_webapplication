@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react'
 import { ArrowDownTrayIcon, ShareIcon, PrinterIcon, MagnifyingGlassMinusIcon, MagnifyingGlassPlusIcon, DocumentIcon } from '@heroicons/react/24/outline'
 import { Document, Page, pdfjs } from 'react-pdf'
 
-// Configure PDF.js worker: prefer unpkg pdfjs-dist to ensure version match and fast load
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+// Configure PDF.js worker: use pdfjs-dist worker from unpkg matching the library version
+// Note: Use the .js worker file (not .mjs) for best compatibility with Next.js bundling
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`
 
 export default function PDFViewerClient({ 
   fileUrl, 
@@ -19,8 +20,7 @@ export default function PDFViewerClient({
   const [numPages, setNumPages] = useState(null)
   const [pageNumber, setPageNumber] = useState(1)
   const [progress, setProgress] = useState(null) // {loaded, total}
-  const [docKey, setDocKey] = useState(0) // force remount when switching worker strategy
-  const [workerFallbackUsed, setWorkerFallbackUsed] = useState(false)
+  // Removed worker-disable fallback to avoid using deprecated/removed pdfjs.disableWorker API
 
   useEffect(() => {
     if (fileUrl) {
@@ -30,26 +30,8 @@ export default function PDFViewerClient({
     }
   }, [fileUrl])
 
-  // Fallback: if worker fails to load or is blocked, disable worker after timeout and retry
-  useEffect(() => {
-    if (!fileUrl) return
-    let cancelled = false
-    const timeout = setTimeout(() => {
-      if (cancelled) return
-      // If still loading and no progress, assume worker couldn't start (CDN blocked/slow)
-      if (isLoading && !progress && !workerFallbackUsed) {
-        try {
-          // Disable worker and re-mount Document
-          pdfjs.disableWorker = true
-          setWorkerFallbackUsed(true)
-          setDocKey(k => k + 1)
-        } catch (_) {}
-      }
-    }, 5000) // 5s timeout before falling back to no-worker mode
-
-    return () => { cancelled = true; clearTimeout(timeout) }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fileUrl, isLoading, progress, workerFallbackUsed])
+  // Note: If the worker fails to load due to network restrictions, the viewer will surface an error state.
+  // We no longer attempt to disable the worker at runtime since that API is not supported in current react-pdf/pdfjs.
 
   const handleLoadSuccess = ({ numPages }) => {
     setNumPages(numPages)
@@ -172,7 +154,6 @@ export default function PDFViewerClient({
           <div className="w-full h-full overflow-auto flex flex-col">
             <div className="flex-1 flex items-start justify-center p-4">
               <Document 
-                key={docKey}
                 file={fileUrl} 
                 onLoadSuccess={handleLoadSuccess} 
                 onLoadError={handleError}
