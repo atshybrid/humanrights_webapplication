@@ -20,6 +20,7 @@ export async function getServerSideProps({ params }) {
       memberId: card.cardNumber || card.membershipId || '',
       phone: card.mobileNumber || '',
       validity: card.expiresAt ? `Valid Thru: ${new Date(card.expiresAt).toLocaleString('en-US', { month: 'short', year: 'numeric' })}` : '',
+      workPlace: card.workPlace || card.workplace || [card.stateName, card.districtName, card.mandalName].filter(Boolean).join(', ')
     }
 
     const orgName = (setting && (setting.frontH1 || setting.name)) || 'Human Rights Council for India'
@@ -29,6 +30,7 @@ export async function getServerSideProps({ params }) {
     const signUrl = (setting && setting.authorSignUrl) || ''
     const gradientStart = (setting && setting.primaryColor) || '#FE0002'
     const gradientEnd = (setting && setting.secondaryColor) || '#1D0DA1'
+    const photoUrl = card.photoUrl || card.profilePhotoUrl || ''
 
     return {
       props: {
@@ -43,6 +45,7 @@ export async function getServerSideProps({ params }) {
         gradientEnd,
         verifyUrl: verifyUrl || null,
         qrUrl: qrUrl || null,
+        photoUrl,
       }
     }
   } catch (e) {
@@ -50,7 +53,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tagline, logoUrl, stampUrl, signUrl, gradientStart, gradientEnd, qrUrl }){
+export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tagline, logoUrl, stampUrl, signUrl, gradientStart, gradientEnd, qrUrl, photoUrl }){
   async function downloadJpg(){
     try{
       const node = document.getElementById('idcard-capture')
@@ -99,11 +102,11 @@ export default function IdCardFrontSSR({ error, cardNumber, member, orgName, tag
             cellName={member?.level || ''}
             memberName={member?.name || ''}
             designation={member?.designation || ''}
+            workPlace={member?.workPlace || ''}
             idNumber={member?.memberId || ''}
             contactNumber={member?.phone || ''}
-            validUpto={member?.validity?.replace('Valid Thru: ','') || ''}
-            issueDate={''}
-            photoUrl={''}
+            validUpto={(member?.validity || '').replace('Valid Thru: ','')}
+            photoUrl={photoUrl || ''}
             stampUrl={stampUrl || ''}
             authorSignUrl={signUrl || ''}
           />

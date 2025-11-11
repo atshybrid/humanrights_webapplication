@@ -4,11 +4,10 @@ export default function IdCardExactFront({
   cellName = '',
   memberName = '',
   designation = '',
-  zone = '',
+  workPlace = '',
   idNumber = '',
   contactNumber = '',
   validUpto = '',
-  issueDate = '',
   photoUrl = '',
   stampUrl = '',
   authorSignUrl = '',
@@ -16,101 +15,72 @@ export default function IdCardExactFront({
   return (
     <div>
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap');
         @page { size: 85.6mm 54mm; margin: 0; }
-        html, body { margin: 0; padding: 0; background: #f3f4f6; }
-        :root { --card-w: 85.6mm; --card-h: 54mm; --red: #FE0002; --blue: #17007A; --text: #111827; --muted-bg: #F3F4F6; --top-band: 6.1mm; --blue-band: 6.1mm; --bottom-band: 4.6mm; --body-h: calc(var(--card-h) - var(--top-band) - var(--blue-band) - var(--bottom-band)); }
-        .page { width: var(--card-w); height: var(--card-h); overflow: hidden; page-break-after: always; background: var(--muted-bg); border: 0.2mm solid #e5e7eb; box-sizing: border-box; position: relative; }
-        .page:last-child { page-break-after: auto; }
-        .band-red { height: var(--top-band); background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; padding: 0 2mm; box-sizing: border-box; }
-        .band-red h1 { margin: 0; font: 900 5.4mm/1 Verdana, Arial, sans-serif; letter-spacing: 0.2mm; text-align: center; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
-        .band-blue { height: var(--blue-band); background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; padding: 0 2mm; box-sizing: border-box; }
-        .band-blue p { margin: 0; font: 700 2.2mm/3.0mm Verdana, Arial, sans-serif; letter-spacing: 0.1mm; text-align: center; }
-        .footer-red { position: absolute; left: 0; right: 0; bottom: 0; height: var(--bottom-band); background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; padding: 0 2mm; box-sizing: border-box; }
-        .footer-red p { margin: 0; font: 800 2mm/1 Verdana, Arial, sans-serif; text-align: center; letter-spacing: 0.05mm; }
-        .front .body { position: absolute; top: calc(var(--top-band) + var(--blue-band)); left: 0; right: 0; height: var(--body-h); padding: 1.2mm 2mm 0 2mm; box-sizing: border-box; }
-        .front .juris-wrap { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-top: 0.8mm; }
-        .front .juris { margin: 0.3mm 0 0 0; font: 900 3.2mm/3.8mm Verdana, Arial, sans-serif; color: #000; letter-spacing: 0.1mm; }
-        .front .niti1 { margin: 0.2mm 0 0 0; font: 800 2.2mm/2.8mm Verdana, Arial, sans-serif; color: #000; }
-        .front .niti2 { margin: 0.1mm 0 0 0; font: 700 2mm/2.5mm Verdana, Arial, sans-serif; color: #000; }
-        .front .works { margin: 0.2mm 0 0 0; font: 800 1.9mm/2.6mm Verdana, Arial, sans-serif; color: var(--red); }
-        .front .identity { margin: 0.2mm 0 0 0; font: 900 2.4mm/3.0mm Verdana, Arial, sans-serif; color: var(--red); }
-        .front .main { display: grid; grid-template-columns: 18mm auto 26mm; grid-gap: 1.2mm; align-items: start; margin-top: 1.4mm; }
-        .front .logo { width: 13.5mm; height: 13.5mm; object-fit: cover; border: 0.4mm solid #fff; background: #fff; display: block; margin-bottom: 1.2mm; }
-        .front .qr { width: 14mm; height: 14mm; object-fit: contain; display: block; }
-        .front .details { background: #F3F4F6; border: 0.2mm solid #e5e7eb; border-radius: 1.8mm; padding: 2mm 2.2mm; }
-        .front .cell { margin: 0 0 0.8mm 0; font: 800 2.4mm/3.0mm Verdana, Arial, sans-serif; color: var(--blue); }
-        .front .name { margin: 0 0 0.8mm 0; font: 800 3.0mm/3.6mm Verdana, Arial, sans-serif; color: var(--text); }
-        .front .desig { margin: 0 0 1.2mm 0; font: 700 2.4mm/3.0mm Verdana, Arial, sans-serif; color: var(--red); }
-        .front .row { display: grid; grid-template-columns: 15mm 2mm auto; align-items: center; column-gap: 1mm; margin: 0.6mm 0; }
-        .front .lbl { font: 900 2.2mm/3.0mm Verdana, Arial, sans-serif; color: var(--text); }
-        .front .val { font: 800 2.2mm/3.0mm Verdana, Arial, sans-serif; color: var(--text); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .front .photo-wrap { position: relative; width: 24mm; height: 28mm; border: 0.2mm solid #e5e7eb; background: #fff; display: flex; align-items: center; justify-content: center; }
-        .front .photo { width: calc(100% - 1mm); height: calc(100% - 1mm); object-fit: cover; }
-        .front .stamp { position: absolute; right: -3mm; bottom: -3mm; width: 14mm; height: 14mm; border-radius: 50%; object-fit: cover; background: transparent; }
-        .front .sign-wrap { margin-top: 1mm; display: flex; flex-direction: column; align-items: center; }
-        .front .sign { width: 22mm; height: 10mm; object-fit: contain; background: transparent; }
-        .front .sign-label { margin-top: -1.2mm; font: 900 2mm/1 Verdana, Arial, sans-serif; color: var(--blue); }
+        html, body { margin: 0; padding: 0; background: #f4f4f4; }
+        .card { width: 85.6mm; height: 54mm; background: #fff; border-radius: 0mm; box-shadow: 0 0 5px rgba(0,0,0,0.2); overflow: hidden; font-family: 'Poppins', sans-serif; position: relative; }
+        .strip-top { background: #FE0002; height: 6.35mm; color: #fff; display: flex; justify-content: center; align-items: center; font-weight: 700; text-transform: uppercase; font-size: 9pt; }
+        .strip-blue { background: #1D0DA1; height: 6.35mm; color: #fff; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 4.5pt; line-height: 1.05; font-weight: 600; text-transform: uppercase; padding-top: 0.2mm; }
+        .center { display: flex; justify-content: space-between; align-items: flex-start; height: 36.7mm; padding: 2mm; position: relative; }
+        .left { width: 19mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+        .left img { width: 13mm; margin-bottom: 2mm; display: block; }
+        .middle { flex: 1; padding: 0 1mm; font-size: 4.8pt; line-height: 1.3; box-sizing: border-box; }
+        .jurisdiction { font-weight: 700; font-size: 8pt; color: #000; text-align: center; margin-bottom: 0.4mm; width: 100%; display: flex; justify-content: center; align-items: center; }
+        .regd, .unique, .work-against, .identity { display: block; text-transform: uppercase; white-space: nowrap; text-align: center; margin-bottom: 0.25mm; }
+        .unique { font-size: 5pt; color: #000; font-weight: 600; }
+        .work-against { color: #FE0002; font-size: 4pt; font-weight: 700; }
+        .identity { color: #FE0002; font-size: 6pt; font-weight: 700; }
+        .member-info { margin-top: 1mm; font-size: 4.7pt; text-align: left; line-height: 1.5; width: calc(100% - 20mm); }
+        .member-info div { display: grid; grid-template-columns: 14mm 1.5mm auto; align-items: center; }
+        .member-info .label { font-weight: 700; text-align: left; }
+        .member-info .colon { text-align: center; }
+        .member-info .value { text-align: left; white-space: nowrap; overflow: visible; text-overflow: unset; font-weight: 600; text-transform: uppercase; }
+        #validUptoValue { color: #FE0002; font-weight: 700; }
+        .right { width: 18mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; margin-right: 2mm; margin-top: 4mm; position: relative; }
+        .member-photo { width: 16.5mm; height: 21mm; border-radius: 3mm; border: 1px solid #ccc; object-fit: cover; }
+        .sign-img { position: absolute; width: 11mm; bottom: -10mm; opacity: 0.9; }
+        .signature-text { font-weight: 700; font-size: 5pt; color: #000; text-align: center; position: absolute; bottom: -9mm; width: 100%; }
+        .stamp { position: absolute; width: 9mm; bottom: -3mm; left: -3mm; opacity: 0.9; }
+        .strip-bottom { background: #FE0002; height: 4.6mm; color: #fff; font-size: 4.5pt; text-align: center; display: flex; align-items: center; justify-content: center; white-space: nowrap; position: absolute; bottom: 0; width: 100%; }
       `}</style>
 
-      <section className="page front">
-        <div className="band-red">
-          <h1>HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)</h1>
+      <div className="card">
+        <div className="strip-top">Human Rights Council for India (HRCI)</div>
+        <div className="strip-blue">
+          REGISTERED BY NCT, NEW DELHI, GOVT OF INDIA<br/>
+          REGISTERED NO: 4396/2022 (UNDER TRUST ACT 1882)<br/>
+          TO PROTECT & PROMOTE THE HUMAN RIGHTS
         </div>
-        <div className="band-blue">
-          <p>
-            REGISTERED BY NCT, NEW DELHI, GOVT OF INDIA<br />
-            REGISTERED NO: 4396/2022 (UNDER TRUST ACT 1882)<br />
-            TO PROTECT & PROMOTE THE HUMAN RIGHTS
-          </p>
-        </div>
-
-        <div className="body">
-          <div className="juris-wrap">
-            <p className="juris">ALL INDIA JURISDICTION</p>
-            <p className="niti1">REGD BY GOVT OF "NITI AAYOG"</p>
-            <p className="niti2">UNIQUE ID: AP/2022/0324217, AP/2022/0326782</p>
-            <p className="works">WORKS AGAINST CRIME, VIOLENCE AND CORRUPTION</p>
-            <p className="identity">IDENTITY CARD</p>
+        <div className="center">
+          <div className="left">
+            {logoUrl ? <img src={logoUrl} alt="Logo" /> : null}
+            {qrUrlFront ? <img src={qrUrlFront} alt="QR Code" /> : null}
           </div>
-
-          <div className="main">
-            <div>
-              {logoUrl ? <img className="logo" src={logoUrl} alt="Logo" /> : null}
-              {qrUrlFront ? <img className="qr" src={qrUrlFront} alt="QR" /> : null}
-            </div>
-
-            <div className="details">
-              {cellName ? <p className="cell">{cellName}</p> : null}
-              {memberName ? <p className="name">{memberName}</p> : null}
-              {designation ? <p className="desig">{designation}</p> : null}
-
-              <div className="row"><span className="lbl">Name</span><span>:</span><span className="val">{memberName}</span></div>
-              <div className="row"><span className="lbl">Designation</span><span>:</span><span className="val">{designation}</span></div>
-              {zone ? <div className="row"><span className="lbl">Zone</span><span>:</span><span className="val">{zone}</span></div> : null}
-              {cellName ? <div className="row"><span className="lbl">Cell</span><span>:</span><span className="val">{cellName}</span></div> : null}
-              <div className="row"><span className="lbl">ID No</span><span>:</span><span className="val">{idNumber}</span></div>
-              <div className="row"><span className="lbl">Contact No</span><span>:</span><span className="val">{contactNumber}</span></div>
-              <div className="row"><span className="lbl">Valid Upto</span><span>:</span><span className="val">{validUpto}</span></div>
-              {issueDate ? <div className="row"><span className="lbl">Issue Date</span><span>:</span><span className="val">{issueDate}</span></div> : null}
-            </div>
-
-            <div>
-              <div className="photo-wrap">
-                {photoUrl ? <img className="photo" src={photoUrl} alt="Photo" /> : null}
-                {stampUrl ? <img className="stamp" src={stampUrl} alt="Stamp" /> : null}
-              </div>
-              <div className="sign-wrap">
-                {authorSignUrl ? <img className="sign" src={authorSignUrl} alt="Author Sign" /> : null}
-                <div className="sign-label">Signature Issue Auth.</div>
-              </div>
+          <div className="middle">
+            <span className="jurisdiction">ALL INDIA JURISDICTION</span>
+            <span className="regd">REGD BY GOVT OF NITI AAYOG</span>
+            <span className="unique">UNIQUE ID: AP/2022/0324217, AP/2022/0326782</span>
+            <span className="work-against">WORKS AGAINST CRIME, VIOLENCE AND CORRUPTION</span>
+            <span className="identity">IDENTITY CARD</span>
+            <div className="member-info">
+              <div><span className="label">Name</span><span className="colon">:</span><span className="value">{memberName || '-'}</span></div>
+              <div><span className="label">Designation</span><span className="colon">:</span><span className="value">{designation || '-'}</span></div>
+              <div><span className="label">Cell</span><span className="colon">:</span><span className="value">{cellName || '-'}</span></div>
+              <div><span className="label">Work Place</span><span className="colon">:</span><span className="value">{workPlace || '-'}</span></div>
+              <div><span className="label">ID No</span><span className="colon">:</span><span className="value">{idNumber || '-'}</span></div>
+              <div><span className="label">Contact No</span><span className="colon">:</span><span className="value">{contactNumber || '-'}</span></div>
+              <div><span className="label">Valid Upto</span><span className="colon">:</span><span id="validUptoValue" className="value">{validUpto || '-'}</span></div>
             </div>
           </div>
+          <div className="right">
+            {photoUrl ? <img className="member-photo" src={photoUrl} alt="Member Photo" /> : <div className="member-photo" />}
+            {authorSignUrl ? <img className="sign-img" src={authorSignUrl} alt="Authorized Signature" /> : null}
+            <div className="signature-text">Signature Auth.</div>
+            {stampUrl ? <img className="stamp" src={stampUrl} alt="HRCI Stamp" /> : null}
+          </div>
         </div>
-
-        <div className="footer-red">
-          <p>We take help 24x7 From (Police, CBI, Vigilance, NIA) & other Govt. Dept. against crime & corruption.</p>
-        </div>
-      </section>
+        <div className="strip-bottom">We take help 24x7 From (Police, CBI, Vigilance, NIA) & other Govt. Dept. Against Crime & Corruption.</div>
+      </div>
     </div>
   )
 }

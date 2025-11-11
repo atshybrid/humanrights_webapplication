@@ -11,17 +11,32 @@ export async function getServerSideProps({ params }) {
     }
 
     const { card, setting, verifyUrl, qrUrl } = data
-    const contact = setting?.headOfficeAddress ? `Head Office: ${setting.headOfficeAddress}` : 'Head Office'
-    const address = setting?.registerDetails || setting?.frontFooterText || 'Registered under Societies Act.'
-    const notes = setting?.frontFooterText || 'This card remains property of HRCI and must be returned upon request.'
+    const headOfficeAddress = setting?.headOfficeAddress || ''
+    const regionalOfficeAddress = setting?.regionalOfficeAddress || ''
+    const administrationOfficeAddress = setting?.administrationOfficeAddress || ''
+    const website = setting?.website || setting?.siteUrl || ''
+    const secondLogoUrl = (setting?.secondLogoUrl || setting?.frontLogoUrl) || ''
+    const contactNumbers = [setting?.helpLineNumber1, setting?.helpLineNumber2].filter(Boolean)
+    const contactNumber1 = contactNumbers[0] || ''
+    const contactNumber2 = contactNumbers[1] || ''
+    const watermarkUrl = setting?.watermarkUrl || 'https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/string.png'
+    const registrationLines = setting?.registrationLines || []
+    const termsLines = setting?.termsLines || []
 
     return {
       props: {
         cardNumber,
         qrUrl: qrUrl || null,
-        contact,
-        address,
-        notes,
+        headOfficeAddress,
+        regionalOfficeAddress,
+        administrationOfficeAddress,
+        website,
+        secondLogoUrl,
+        contactNumber1,
+        contactNumber2,
+        watermarkUrl,
+        registrationLines,
+        termsLines,
       }
     }
   } catch (e) {
@@ -29,7 +44,7 @@ export async function getServerSideProps({ params }) {
   }
 }
 
-export default function IdCardBackSSR({ error, qrUrl, contact, address, notes, cardNumber }){
+export default function IdCardBackSSR({ error, qrUrl, headOfficeAddress, regionalOfficeAddress, administrationOfficeAddress, website, secondLogoUrl, contactNumber1, contactNumber2, watermarkUrl, registrationLines, termsLines, cardNumber }){
   async function downloadJpg(){
     try{
       const node = document.getElementById('idcard-capture')
@@ -74,15 +89,16 @@ export default function IdCardBackSSR({ error, qrUrl, contact, address, notes, c
           {/* Exact print design back version */}
           <IdCardExactBack
             qrUrlBack={qrUrl || ''}
-            registrationLines={[]}
-            termsLines={[]}
-            headOfficeAddress={contact?.replace('Head Office: ','') || ''}
-            regionalOfficeAddress={''}
-            administrationOfficeAddress={''}
-            website={''}
-            secondLogoUrl={''}
-            contactNumber1={''}
-            contactNumber2={''}
+            watermarkUrl={watermarkUrl}
+            registrationLines={registrationLines}
+            termsLines={termsLines}
+            headOfficeAddress={headOfficeAddress}
+            regionalOfficeAddress={regionalOfficeAddress}
+            administrationOfficeAddress={administrationOfficeAddress}
+            website={website}
+            secondLogoUrl={secondLogoUrl}
+            contactNumber1={contactNumber1}
+            contactNumber2={contactNumber2}
           />
         </div>
       </div>

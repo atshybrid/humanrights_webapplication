@@ -1,5 +1,6 @@
 export default function IdCardExactBack({
   qrUrlBack = '',
+  watermarkUrl = '',
   registrationLines = [],
   termsLines = [],
   headOfficeAddress = '',
@@ -11,79 +12,72 @@ export default function IdCardExactBack({
   contactNumber2 = '',
 }){
   const defaultRegistration = registrationLines && registrationLines.length ? registrationLines : [
-    'REGISTERED BY NCT, NEW DELHI, GOVT OF INDIA',
-    'REGISTERED NO: 4396/2022 (UNDER TRUST ACT 1882)',
-    'TO PROTECT & PROMOTE THE HUMAN RIGHTS'
+    'REGISTERED BY MINISTRY OF CORPORATE AFFAIRS, INDIA',
+    'REGD NO: CSR0036936 OF "HRCI", CSR 00038592 OF "HRCI"',
+    'REGD NO: BK-IV-46/2022 "HRCI" ISO CERTIFICATE NO: ΙΝΟ/ΑΡ12129/0922',
+    'REGD UNDER "UDYAM" NO: AP-21-0001051, AP-21-0001502 "HRCI"',
+    'REGD BY: MINISTRY OF SOCIAL JUSTICE AND EMPOWERMENT',
+    'GOVT OF INDIA REGD BY AP/00036080'
   ]
   const defaultTerms = termsLines && termsLines.length ? termsLines : [
-    'This card is property of HRCI.',
-    'Must be presented on demand by authorities.',
-    'Non-transferable and revocable.',
-    'If found, kindly return to HRCI.'
+    'This card is the property of HRCI and must be returned upon request to HRCI management.',
+    'This card can be withdrawn any time without notice.',
+    'Use this card as per the terms and conditions of the card holder agreement.',
+    'If found please return this card to nearest police station or HRCI office.'
   ]
 
   return (
     <div>
       <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&display=swap');
         @page { size: 85.6mm 54mm; margin: 0; }
-        html, body { margin: 0; padding: 0; background: #f3f4f6; }
-        :root { --card-w: 85.6mm; --card-h: 54mm; --red: #FE0002; --blue: #17007A; --text: #111827; --muted-bg: #F3F4F6; --top-band: 6.1mm; --bottom-band: 4.6mm; }
-        .page { width: var(--card-w); height: var(--card-h); overflow: hidden; page-break-after: always; background: var(--muted-bg); border: 0.2mm solid #e5e7eb; box-sizing: border-box; position: relative; }
-        .page:last-child { page-break-after: auto; }
-        .band-red { height: var(--top-band); background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; padding: 0 2mm; box-sizing: border-box; }
-        .band-red h1 { margin: 0; font: 900 5.4mm/1 Verdana, Arial, sans-serif; letter-spacing: 0.2mm; text-align: center; text-transform: uppercase; white-space: nowrap; overflow: hidden; }
-        .back .body { position: absolute; top: var(--top-band); left: 0; right: 0; height: calc(var(--card-h) - var(--top-band)); box-sizing: border-box; padding: 1.2mm 2mm var(--bottom-band) 2mm; }
-        .back .row-main { display: grid; grid-template-columns: 16mm auto 16mm; grid-gap: 1.2mm; align-items: start; margin-top: 2mm; }
-        .back .qr { width: 13mm; height: 13mm; object-fit: contain; }
-        .back .logo { width: 13mm; height: 13mm; object-fit: cover; display: block; margin-left: auto; }
-        .back .reg { text-align: center; color: var(--text); }
-        .back .reg .line { margin: 0.4mm 0; font: 800 2.2mm/2.8mm Verdana, Arial, sans-serif; }
-        .back .terms-title { margin: 1mm 0 0.6mm 0; font: 900 2.2mm/2.8mm Verdana, Arial, sans-serif; text-align: center; }
-        .back .term { margin: 0.3mm 0; font: 700 1.8mm/2.4mm Verdana, Arial, sans-serif; text-align: center; }
-        .back .addr-label { margin: 0.6mm 0 0.2mm 0; font: 900 2mm/2.6mm Verdana, Arial, sans-serif; text-align: center; }
-        .back .addr { margin: 0 0 0.4mm 0; font: 700 1.8mm/2.4mm Verdana, Arial, sans-serif; text-align: center; }
-        .back .web { margin: 0.6mm 0 0 0; font: 800 2mm/2.6mm Verdana, Arial, sans-serif; text-align: center; }
-        .back .footer-blue { position: absolute; left: 0; right: 0; bottom: 0; height: var(--bottom-band); background: var(--blue); color: #fff; display: flex; align-items: center; justify-content: center; padding: 0 2mm; box-sizing: border-box; }
-        .back .footer-blue p { margin: 0; font: 800 2mm/1 Verdana, Arial, sans-serif; text-align: center; }
+        html,body{height:100%;margin:0}
+        body{background:#f4f4f4;font-family:'Poppins',sans-serif;}
+        .card{width:85.6mm;height:54mm;background:#fff;box-shadow:0 0 5px rgba(0,0,0,0.12);position:relative;overflow:hidden;}
+        .strip-top{height:6.35mm;background:linear-gradient(to bottom, #FE0002 0%, #FE0002 49.999%, #1D0DA1 50%, #1D0DA1 100%);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-transform:uppercase;font-size:9pt;padding:0 4mm;position:absolute;top:0;left:0;right:0;z-index:5;}
+        .back-center{position:absolute;top:6.35mm;left:0;right:0;bottom:4.6mm;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;padding:2.5mm;box-sizing:border-box;background:#fff;z-index:4;}
+        .watermark{position:absolute;top:55%;left:50%;transform:translate(-50%,-50%);width:30mm;height:30mm;opacity:0.3;pointer-events:none;z-index:3;object-fit:contain;filter: sepia(1) saturate(5) hue-rotate(10deg) brightness(1.05) contrast(1.1);}
+        .registration-text,.terms,.office-address{position:relative;z-index:5;}
+        .qr-large{position:absolute;top:2.0mm;left:2.0mm;width:12mm;height:12mm;border:1px solid #e0e0e0;display:block;margin:0;z-index:6;}
+        .registration-text{font-size:4.2pt;line-height:1.5;color:#000;font-weight:600;text-transform:uppercase;margin-left:14mm;margin-top:0;text-align:left;}
+        .terms{margin-left:2mm;margin-top:0.8mm;font-size:4pt;color:#000;}
+        .terms strong{color:#FE0002;font-weight:700}
+        .terms ol{margin:0;padding-left:2mm;}
+        .terms li{margin:0}
+        .office-address{margin-top:0.5mm;font-size:4pt;line-height:1;text-align:center;}
+        .office-address p{margin:0.2mm 0}
+        .office-address strong{display:block;color:#000;font-weight:700;margin-bottom:0.2mm;text-align:center;}
+        .hrci-logo-right{position:absolute;top:2mm;right:2mm;width:12mm;height:12mm;opacity:1;z-index:6;object-fit:contain;}
+        .strip-bottom{position:absolute;bottom:0;left:0;right:0;background:#FE0002;height:4.6mm;color:#fff;display:flex;align-items:center;justify-content:center;font-size:4.5pt;text-align:center;padding:0 3mm;z-index:6;}
+        .help-label{font-weight:700;margin-right:4px}
+        #contactNumbers{font-weight:700}
       `}</style>
 
-      <section className="page back">
-        <div className="band-red">
-          <h1>HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)</h1>
-        </div>
-
-        <div className="body">
-          <div className="row-main">
-            <div>{qrUrlBack ? <img className="qr" src={qrUrlBack} alt="QR" /> : null}</div>
-            <div className="reg">
-              {defaultRegistration.map((line, i) => (<p key={i} className="line">{line}</p>))}
-
-              <p className="terms-title">Terms &amp; Conditions</p>
-              {defaultTerms.map((line, i) => (<p key={`t-${i}`} className="term">{line}</p>))}
-
-              {headOfficeAddress ? (<>
-                <p className="addr-label">HEAD OFFICE</p>
-                <p className="addr">{headOfficeAddress}</p>
-              </>) : null}
-              {regionalOfficeAddress ? (<>
-                <p className="addr-label">REGIONAL OFFICE</p>
-                <p className="addr">{regionalOfficeAddress}</p>
-              </>) : null}
-              {administrationOfficeAddress ? (<>
-                <p className="addr-label">ADMINISTRATION OFFICE</p>
-                <p className="addr">{administrationOfficeAddress}</p>
-              </>) : null}
-
-              {website ? <p className="web">{website}</p> : null}
-            </div>
-            <div>{secondLogoUrl ? <img className="logo" src={secondLogoUrl} alt="Logo" /> : null}</div>
+      <div className="card">
+        <div className="strip-top">Human Rights Council for India (HRCI)</div>
+        <div className="back-center">
+          {watermarkUrl ? <img className="watermark" src={watermarkUrl} alt="watermark"/> : null}
+          {qrUrlBack ? <img className="qr-large" src={qrUrlBack} alt="QR"/> : null}
+          <div className="registration-text">
+            {defaultRegistration.map((line, i) => (<div key={i}>{line}<br/></div>))}
           </div>
+          <div className="terms">
+            <strong>Terms &amp; Conditions:-</strong>
+            <ol>
+              {defaultTerms.map((line, i) => (<li key={i}>{line}</li>))}
+            </ol>
+            <hr style={{border:0,borderTop:'0.3mm solid #000',margin:'0.6mm 0'}}/>
+            <div className="office-address">
+              {headOfficeAddress ? (<p><strong>Head Office:</strong> <span>{headOfficeAddress}</span></p>) : null}
+              {regionalOfficeAddress ? (<p><strong>Regional Office:</strong> <span>{regionalOfficeAddress}</span></p>) : null}
+              {administrationOfficeAddress ? (<p><strong>Administration Office:</strong> <span>{administrationOfficeAddress}</span></p>) : null}
+              {website ? (<p><strong>Website:</strong> <span>{website}</span></p>) : null}
+            </div>
+          </div>
+          {secondLogoUrl ? <img className="hrci-logo-right" src={secondLogoUrl} alt="HRCI Logo"/> : null}
         </div>
-
-        <div className="footer-blue">
-          <p>HELP LINE NUMBER {contactNumber1}{contactNumber2 ? `  |  ${contactNumber2}` : ''}</p>
-        </div>
-      </section>
+        <div className="strip-bottom"><span className="help-label">Help Line Number:</span> <span id="contactNumbers">{[contactNumber1, contactNumber2].filter(Boolean).join('  |  ') || '-'}</span></div>
+      </div>
     </div>
   )
 }
