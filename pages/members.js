@@ -359,36 +359,20 @@ export default function MembersPage(){
                 )}
                 {(level === 'DISTRICT' || level === 'MANDAL') && (
                   <div>
-                    <label className="text-xs text-gray-500 flex justify-between"><span>District</span><span className="text-[10px] text-gray-400">or paste ID</span></label>
-                    <div className="mt-1 flex gap-2">
-                      <select className="w-1/2 rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> { setSelectedDistrictId(e.target.value); setPage(1) }}>
-                        <option value="">Select</option>
-                        {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
-                      </select>
-                      <input
-                        placeholder="District ID"
-                        value={selectedDistrictId}
-                        onChange={e=> { setSelectedDistrictId(e.target.value.trim()); setPage(1) }}
-                        className="w-1/2 rounded-lg border border-gray-300 px-2 py-2 text-sm"
-                      />
-                    </div>
+                    <label className="text-xs text-gray-500">District</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> { setSelectedDistrictId(e.target.value); setPage(1) }}>
+                      <option value="">Select</option>
+                      {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
+                    </select>
                   </div>
                 )}
                 {level === 'MANDAL' && (
                   <div>
-                    <label className="text-xs text-gray-500 flex justify-between"><span>Mandal</span><span className="text-[10px] text-gray-400">or paste ID</span></label>
-                    <div className="mt-1 flex gap-2">
-                      <select className="w-1/2 rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> { setSelectedMandalId(e.target.value); setPage(1) }}>
-                        <option value="">Select</option>
-                        {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
-                      </select>
-                      <input
-                        placeholder="Mandal ID"
-                        value={selectedMandalId}
-                        onChange={e=> { setSelectedMandalId(e.target.value.trim()); setPage(1) }}
-                        className="w-1/2 rounded-lg border border-gray-300 px-2 py-2 text-sm"
-                      />
-                    </div>
+                    <label className="text-xs text-gray-500">Mandal</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> { setSelectedMandalId(e.target.value); setPage(1) }}>
+                      <option value="">Select</option>
+                      {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
+                    </select>
                   </div>
                 )}
                 <div>
