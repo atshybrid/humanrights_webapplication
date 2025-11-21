@@ -74,10 +74,9 @@ export default function MembersPage(){
     if (!activeCellId) return 'Select a cell'
     if (!designationCode) return 'Select a designation'
     if (level === 'NATIONAL') return null
-    // Zone selection is not required (API does not accept a zone filter)
-    if (level === 'STATE' && !selectedStateId) return 'Select a state'
-    if (level === 'DISTRICT' && !selectedDistrictId) return 'Select a district'
-    if (level === 'MANDAL' && !selectedMandalId) return 'Select a mandal'
+    if (level === 'STATE' && !selectedStateId) return 'State required'
+    if (level === 'DISTRICT' && !selectedDistrictId) return 'District ID required'
+    if (level === 'MANDAL' && !selectedMandalId) return 'Mandal ID required'
     return null
   }, [activeCellId, designationCode, level, selectedStateId, selectedDistrictId, selectedMandalId])
   const canCheck = !availabilityLoading && !requiredHint
@@ -127,13 +126,11 @@ export default function MembersPage(){
   // Reset deeper selections when level changes
   useEffect(() => {
     if (level === 'NATIONAL') {
-      setSelectedStateId('')
-      setSelectedDistrictId('')
-      setSelectedMandalId('')
+      setSelectedStateId(''); setSelectedDistrictId(''); setSelectedMandalId('')
     } else if (level === 'STATE') {
-      setSelectedDistrictId('')
-      setSelectedMandalId('')
+      setSelectedDistrictId(''); setSelectedMandalId('')
     } else if (level === 'DISTRICT') {
+      // keep district id if already set; just clear mandal
       setSelectedMandalId('')
     }
     setPage(1)
@@ -145,10 +142,10 @@ export default function MembersPage(){
   const canFetchMembers = useMemo(() => {
     if (!level) return false
     if (level === 'NATIONAL') return true
-    if (level === 'ZONE') return !!selectedCountryId // pass only country for zone
+    if (level === 'ZONE') return !!selectedCountryId
     if (level === 'STATE') return !!selectedStateId
-    if (level === 'DISTRICT') return !!selectedStateId && !!selectedDistrictId
-    if (level === 'MANDAL') return !!selectedStateId && !!selectedDistrictId && !!selectedMandalId
+    if (level === 'DISTRICT') return !!selectedDistrictId
+    if (level === 'MANDAL') return !!selectedMandalId
     return false
   }, [level, selectedCountryId, selectedStateId, selectedDistrictId, selectedMandalId])
 
@@ -159,8 +156,8 @@ export default function MembersPage(){
     const params = {
       level,
       hrcCountryId: selectedCountryId || undefined,
-      hrcStateId: level === 'STATE' || level === 'DISTRICT' || level === 'MANDAL' ? selectedStateId : undefined,
-      hrcDistrictId: level === 'DISTRICT' || level === 'MANDAL' ? selectedDistrictId : undefined,
+      hrcStateId: level === 'STATE' ? selectedStateId : undefined,
+      hrcDistrictId: level === 'DISTRICT' ? selectedDistrictId : (level === 'MANDAL' ? selectedDistrictId || undefined : undefined),
       hrcMandalId: level === 'MANDAL' ? selectedMandalId : undefined,
       q: q || undefined,
       page,
@@ -362,20 +359,36 @@ export default function MembersPage(){
                 )}
                 {(level === 'DISTRICT' || level === 'MANDAL') && (
                   <div>
-                    <label className="text-xs text-gray-500">District</label>
-                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> { setSelectedDistrictId(e.target.value); setPage(1) }}>
-                      <option value="">Select</option>
-                      {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
-                    </select>
+                    <label className="text-xs text-gray-500 flex justify-between"><span>District</span><span className="text-[10px] text-gray-400">or paste ID</span></label>
+                    <div className="mt-1 flex gap-2">
+                      <select className="w-1/2 rounded-lg border-gray-300 text-sm" value={selectedDistrictId} onChange={e=> { setSelectedDistrictId(e.target.value); setPage(1) }}>
+                        <option value="">Select</option>
+                        {(districts||[]).map(d=> <option key={d.id} value={d.id}>{d.name}</option>)}
+                      </select>
+                      <input
+                        placeholder="District ID"
+                        value={selectedDistrictId}
+                        onChange={e=> { setSelectedDistrictId(e.target.value.trim()); setPage(1) }}
+                        className="w-1/2 rounded-lg border border-gray-300 px-2 py-2 text-sm"
+                      />
+                    </div>
                   </div>
                 )}
                 {level === 'MANDAL' && (
                   <div>
-                    <label className="text-xs text-gray-500">Mandal</label>
-                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> { setSelectedMandalId(e.target.value); setPage(1) }}>
-                      <option value="">Select</option>
-                      {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
-                    </select>
+                    <label className="text-xs text-gray-500 flex justify-between"><span>Mandal</span><span className="text-[10px] text-gray-400">or paste ID</span></label>
+                    <div className="mt-1 flex gap-2">
+                      <select className="w-1/2 rounded-lg border-gray-300 text-sm" value={selectedMandalId} onChange={e=> { setSelectedMandalId(e.target.value); setPage(1) }}>
+                        <option value="">Select</option>
+                        {(mandals||[]).map(m=> <option key={m.id} value={m.id}>{m.name}</option>)}
+                      </select>
+                      <input
+                        placeholder="Mandal ID"
+                        value={selectedMandalId}
+                        onChange={e=> { setSelectedMandalId(e.target.value.trim()); setPage(1) }}
+                        className="w-1/2 rounded-lg border border-gray-300 px-2 py-2 text-sm"
+                      />
+                    </div>
                   </div>
                 )}
                 <div>
