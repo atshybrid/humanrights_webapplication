@@ -5,7 +5,7 @@ export default function ContactPage() {
   const offices = [
     {
       title: 'Head Office',
-      address: 'NEW DELHI',
+      address: 'FLAT NO- 502 H NO- 831-, GD COLONY, MAYUR VIHAR PH- 3 DELHI- 110096',
     },
     {
       title: 'Regional Office',
