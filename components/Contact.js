@@ -6,7 +6,7 @@ export default function Contact(){
       <p className="mt-4 text-gray-600">Reach us for donations, legal help, or partnerships.</p>
       <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <p><strong>Address</strong><br/>HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)<br/>7/19 CENAL CENTER KARAMCHEDU , PRAKASAM , BAPATLA 523138 Andhra Pradesh, India</p>
+          <p><strong>Head Office</strong><br/>HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)<br/>FLAT NO- 502 H NO- 831-, GD COLONY, MAYUR VIHAR PH- 3 DELHI- 110096</p>
           <p className="mt-2"><strong>Email</strong><br/>support@humanrightscouncilforindia.org</p>
           <p className="mt-2"><strong>Phone</strong><br/>+91 8906189999</p>
         </div>
