@@ -33,6 +33,7 @@ export default function MembersPage(){
   const [designationCode, setDesignationCode] = useState('')
 
   const [countries, setCountries] = useState([])
+  const [zones, setZones] = useState([])
   const [states, setStates] = useState([])
   const [districts, setDistricts] = useState([])
   const [mandals, setMandals] = useState([])
@@ -40,6 +41,7 @@ export default function MembersPage(){
   const [geoLoading, setGeoLoading] = useState(false)
 
   const [selectedCountryId, setSelectedCountryId] = useState('')
+  const [selectedZoneId, setSelectedZoneId] = useState('')
   const [selectedStateId, setSelectedStateId] = useState('')
   const [selectedDistrictId, setSelectedDistrictId] = useState('')
   const [selectedMandalId, setSelectedMandalId] = useState('')
@@ -74,11 +76,12 @@ export default function MembersPage(){
     if (!activeCellId) return 'Select a cell'
     if (!designationCode) return 'Select a designation'
     if (level === 'NATIONAL') return null
+    if (level === 'ZONE' && !selectedZoneId) return 'Zone required'
     if (level === 'STATE' && !selectedStateId) return 'State required'
     if (level === 'DISTRICT' && !selectedDistrictId) return 'District ID required'
     if (level === 'MANDAL' && !selectedMandalId) return 'Mandal ID required'
     return null
-  }, [activeCellId, designationCode, level, selectedStateId, selectedDistrictId, selectedMandalId])
+  }, [activeCellId, designationCode, level, selectedZoneId, selectedStateId, selectedDistrictId, selectedMandalId])
   const canCheck = !availabilityLoading && !requiredHint
 
   useEffect(() => {
@@ -95,8 +98,9 @@ export default function MembersPage(){
       setDesignations(sorted)
     }).finally(()=> setDesignationsLoading(false))
 
-    Promise.all([getHrcCountries()]).then(([c])=>{
+    Promise.all([getHrcCountries(), getHrcZones()]).then(([c, z])=>{
       setCountries(c)
+      setZones(z)
       const india = c?.find(x=> x.code === 'IN')
       if (india) setSelectedCountryId(india.id)
     })
@@ -126,12 +130,13 @@ export default function MembersPage(){
   // Reset deeper selections when level changes
   useEffect(() => {
     if (level === 'NATIONAL') {
+      setSelectedZoneId(''); setSelectedStateId(''); setSelectedDistrictId(''); setSelectedMandalId('')
+    } else if (level === 'ZONE') {
       setSelectedStateId(''); setSelectedDistrictId(''); setSelectedMandalId('')
     } else if (level === 'STATE') {
-      setSelectedDistrictId(''); setSelectedMandalId('')
+      setSelectedZoneId(''); setSelectedDistrictId(''); setSelectedMandalId('')
     } else if (level === 'DISTRICT') {
-      // keep district id if already set; just clear mandal
-      setSelectedMandalId('')
+      setSelectedZoneId(''); setSelectedMandalId('')
     }
     setPage(1)
   }, [level])
@@ -142,12 +147,12 @@ export default function MembersPage(){
   const canFetchMembers = useMemo(() => {
     if (!level) return false
     if (level === 'NATIONAL') return true
-    if (level === 'ZONE') return !!selectedCountryId
+    if (level === 'ZONE') return !!selectedZoneId
     if (level === 'STATE') return !!selectedStateId
     if (level === 'DISTRICT') return !!selectedDistrictId
     if (level === 'MANDAL') return !!selectedMandalId
     return false
-  }, [level, selectedCountryId, selectedStateId, selectedDistrictId, selectedMandalId])
+  }, [level, selectedZoneId, selectedStateId, selectedDistrictId, selectedMandalId])
 
   useEffect(() => {
     if (!canFetchMembers) { setMembers([]); setMembersTotal(0); return }
@@ -156,6 +161,7 @@ export default function MembersPage(){
     const params = {
       level,
       hrcCountryId: selectedCountryId || undefined,
+      zone: level === 'ZONE' ? selectedZoneId : undefined,
       hrcStateId: level === 'STATE' ? selectedStateId : undefined,
       hrcDistrictId: level === 'DISTRICT' ? selectedDistrictId : (level === 'MANDAL' ? selectedDistrictId || undefined : undefined),
       hrcMandalId: level === 'MANDAL' ? selectedMandalId : undefined,
@@ -170,7 +176,7 @@ export default function MembersPage(){
       })
       .catch(()=> setMembersError('Unable to load members.'))
       .finally(()=> setMembersLoading(false))
-  }, [level, selectedStateId, selectedDistrictId, selectedMandalId, q, page, pageSize, canFetchMembers])
+  }, [level, selectedZoneId, selectedStateId, selectedDistrictId, selectedMandalId, q, page, pageSize, canFetchMembers])
 
   const onCheckAvailability = async () => {
     setAvailability(null)
@@ -182,6 +188,7 @@ export default function MembersPage(){
         designationCode,
         level,
         hrcCountryId: selectedCountryId || undefined,
+        zone: level === 'ZONE' ? selectedZoneId : undefined,
         hrcStateId: level === 'STATE' ? selectedStateId : undefined,
         hrcDistrictId: level === 'DISTRICT' ? selectedDistrictId : undefined,
         hrcMandalId: level === 'MANDAL' ? selectedMandalId : undefined,
@@ -190,7 +197,8 @@ export default function MembersPage(){
       const data = await getMembershipAvailability(payload)
       setAvailability(data)
     }catch(e){
-      setAvailabilityError('Unable to check availability right now.')
+      console.error('Availability check failed:', e)
+      setAvailabilityError(e?.message || 'Unable to check availability right now.')
     }finally{
       setAvailabilityLoading(false)
     }
@@ -204,6 +212,7 @@ export default function MembersPage(){
   const buildLocationPayload = () => {
     const payload = { level }
     if (selectedCountryId) payload.hrcCountryId = selectedCountryId
+    if (level === 'ZONE') payload.zone = selectedZoneId
     if (level === 'STATE') payload.hrcStateId = selectedStateId
     if (level === 'DISTRICT') payload.hrcDistrictId = selectedDistrictId
     if (level === 'MANDAL') payload.hrcMandalId = selectedMandalId
@@ -345,6 +354,15 @@ export default function MembersPage(){
                     <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedCountryId} onChange={e=> setSelectedCountryId(e.target.value)}>
                       <option value="">Select</option>
                       {(countries||[]).map(c=> <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                {level === 'ZONE' && (
+                  <div>
+                    <label className="text-xs text-gray-500">Zone</label>
+                    <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedZoneId} onChange={e=> { setSelectedZoneId(e.target.value); setPage(1) }}>
+                      <option value="">Select</option>
+                      {(zones||[]).map(z=> <option key={z.id} value={z.id}>{z.name}</option>)}
                     </select>
                   </div>
                 )}
