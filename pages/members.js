@@ -427,7 +427,7 @@ export default function MembersPage(){
                             </div>
                             <div className="mt-3 flex items-center text-xs text-gray-600">
                               {m.mobileNumber ? (
-                                <span className="inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path d="M2 3.5A1.5 1.5 0 013.5 2h2A1.5 1.5 0 017 3.5V5A1.5 1.5 0 015.5 6h-2A1.5 1.5 0 012 4.5v-1zM2 9.5A1.5 1.5 0 013.5 8h2A1.5 1.5 0 017 9.5V11a1.5 1.5 0 01-1.5 1.5h-2A1.5 1.5 0 012 10.5v-1zM2 15.5A1.5 1.5 0 013.5 14h2A1.5 1.5 0 017 15.5V17A1.5 1.5 0 015.5 18h-2A1.5 1.5 0 012 16.5v-1zM9 4a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1zM9 10a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1zM9 16a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1z"/></svg>{m.mobileNumber}</span>
+                                <span className="inline-flex items-center gap-1"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4"><path d="M2 3.5A1.5 1.5 0 013.5 2h2A1.5 1.5 0 017 3.5V5A1.5 1.5 0 015.5 6h-2A1.5 1.5 0 012 4.5v-1zM2 9.5A1.5 1.5 0 013.5 8h2A1.5 1.5 0 017 9.5V11a1.5 1.5 0 01-1.5 1.5h-2A1.5 1.5 0 012 10.5v-1zM2 15.5A1.5 1.5 0 013.5 14h2A1.5 1.5 0 017 15.5V17A1.5 1.5 0 015.5 18h-2A1.5 1.5 0 012 16.5v-1zM9 4a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1zM9 10a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1zM9 16a1 1 0 011-1h8a1 1 0 110 2h-8a1 1 0 01-1-1z"/></svg>{'*'.repeat(Math.max(0, String(m.mobileNumber).length - 4)) + String(m.mobileNumber).slice(-4)}</span>
                               ) : null}
                             </div>
                           </div>
