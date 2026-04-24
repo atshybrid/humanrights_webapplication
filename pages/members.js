@@ -520,31 +520,6 @@ export default function MembersPage(){
             </div>
           </div>
         </section>
-
-        {/* Results header */}
-        <section className="mt-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900">Directory</h2>
-            <div className="text-sm text-gray-600">Level: {level}</div>
-          </div>
-          <p className="mt-1 text-sm text-gray-600">Members/Volunteers list will appear here. While the API is being prepared, you can filter locations and check seat availability above.</p>
-
-          {/* Placeholder grid */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="rounded-2xl ring-1 ring-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm">
-              <p className="font-semibold">Coming soon</p>
-              <p className="mt-1">We will display member cards with photo, name, designation, and contact (masked) once the API is available.</p>
-            </div>
-            <div className="rounded-2xl ring-1 ring-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm">
-              <p className="font-semibold">Summary view</p>
-              <p className="mt-1">An aggregate summary by designation per level will be shown on top for quick insights.</p>
-            </div>
-            <div className="rounded-2xl ring-1 ring-gray-200 bg-white p-4 text-sm text-gray-700 shadow-sm">
-              <p className="font-semibold">Map pins</p>
-              <p className="mt-1">Interactive pins will highlight counts and allow drill-down to states/districts/mandals.</p>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Join dialog */}
