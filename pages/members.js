@@ -362,7 +362,7 @@ export default function MembersPage(){
                     <label className="text-xs text-gray-500">Zone</label>
                     <select className="mt-1 w-full rounded-lg border-gray-300 text-sm" value={selectedZoneId} onChange={e=> { setSelectedZoneId(e.target.value); setPage(1) }}>
                       <option value="">Select</option>
-                      {(zones||[]).map(z=> <option key={z.id} value={z.id}>{z.name}</option>)}
+                      {(zones||[]).map(z=> <option key={z} value={z}>{z}</option>)}
                     </select>
                   </div>
                 )}
