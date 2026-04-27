@@ -284,7 +284,7 @@ export default function MembersPage(){
     return payload
   }
 
-  const handleCopyShareLink = () => {
+  const handleCopyShareLink = async () => {
     const base = `${window.location.origin}/members`
     const params = new URLSearchParams()
     params.set('level', level)
@@ -294,14 +294,27 @@ export default function MembersPage(){
     if (selectedStateId) params.set('state', selectedStateId)
     if (selectedDistrictId) params.set('district', selectedDistrictId)
     if (selectedMandalId) params.set('mandal', selectedMandalId)
-    const url = `${base}?${params.toString()}`
+    const fullUrl = `${base}?${params.toString()}`
+
+    setShareCopied('loading')
+    let finalUrl = fullUrl
+    try {
+      const res = await fetch('/api/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fullUrl }),
+      })
+      const data = await res.json()
+      if (data.short) finalUrl = data.short
+    } catch (_) {}
+
     if (navigator?.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => {
-        setShareCopied(true)
+      navigator.clipboard.writeText(finalUrl).then(() => {
+        setShareCopied('done')
         setTimeout(() => setShareCopied(false), 2500)
-      }).catch(() => fallbackCopy(url))
+      }).catch(() => fallbackCopy(finalUrl))
     } else {
-      fallbackCopy(url)
+      fallbackCopy(finalUrl)
     }
   }
 
@@ -315,7 +328,7 @@ export default function MembersPage(){
       el.select()
       document.execCommand('copy')
       document.body.removeChild(el)
-      setShareCopied(true)
+      setShareCopied('done')
       setTimeout(() => setShareCopied(false), 2500)
     } catch (_) {}
   }
@@ -599,7 +612,7 @@ export default function MembersPage(){
                     <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z" />
                     <path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z" />
                   </svg>
-                  {shareCopied ? 'Link copied!' : 'Copy share link'}
+                  {shareCopied === 'loading' ? 'Shortening…' : shareCopied === 'done' ? 'Link copied!' : 'Copy share link'}
                 </button>
                 {requiredHint ? <p className="-mt-2 text-xs text-gray-500">{requiredHint}</p> : null}
                 {availabilityError ? <p className="text-sm text-red-600">{availabilityError}</p> : null}
