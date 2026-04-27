@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Head from 'next/head'
 import Script from 'next/script'
 import { useRouter } from 'next/router'
@@ -64,6 +64,12 @@ export default function MembersPage(){
   const [joinLoading, setJoinLoading] = useState(false)
   const [joinResult, setJoinResult] = useState(null)
   const [lastOrder, setLastOrder] = useState(null)
+
+  // Share-link state
+  const [initialParams, setInitialParams] = useState(null)
+  const urlApplied = useRef({ cell: false, designation: false, zone: false, state: false, district: false, mandal: false })
+  const autoCheckedRef = useRef(false)
+  const [shareCopied, setShareCopied] = useState(false)
 
   // Helpers to resolve selected display names
   const selectedState = useMemo(() => (states||[]).find(s=> s.id === selectedStateId) || null, [states, selectedStateId])
@@ -141,6 +147,65 @@ export default function MembersPage(){
     setPage(1)
   }, [level])
 
+  // ── URL param initialization ─────────────────────────────────────────────────
+  // Read query params when router is ready; store them for cascade application
+  useEffect(() => {
+    if (!router.isReady) return
+    const { level: lvl, cell, designation, zone, state, district, mandal } = router.query
+    if (lvl && LEVELS.includes(lvl)) setLevel(lvl)
+    if (cell || designation || zone || state || district || mandal) {
+      setInitialParams({ cell, designation, zone, state, district, mandal })
+    }
+  }, [router.isReady]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Apply cell param when cells are loaded
+  useEffect(() => {
+    if (urlApplied.current.cell || !initialParams?.cell || !cells.length) return
+    const found = cells.find(c => c.id === initialParams.cell)
+    if (found) { setActiveCellId(found.id); urlApplied.current.cell = true }
+  }, [initialParams, cells])
+
+  // Apply designation param when designations are loaded
+  useEffect(() => {
+    if (urlApplied.current.designation || !initialParams?.designation || !designations.length) return
+    const found = designations.find(d => d.code === initialParams.designation)
+    if (found) { setDesignationCode(found.code); urlApplied.current.designation = true }
+  }, [initialParams, designations])
+
+  // Apply zone param when zones are loaded
+  useEffect(() => {
+    if (urlApplied.current.zone || !initialParams?.zone || !zones.length) return
+    if (zones.includes(initialParams.zone)) { setSelectedZoneId(initialParams.zone); urlApplied.current.zone = true }
+  }, [initialParams, zones])
+
+  // Apply state param when states are loaded
+  useEffect(() => {
+    if (urlApplied.current.state || !initialParams?.state || !states.length) return
+    const found = states.find(s => s.id === initialParams.state)
+    if (found) { setSelectedStateId(found.id); urlApplied.current.state = true }
+  }, [initialParams, states])
+
+  // Apply district param when districts are loaded (cascade: depends on selectedStateId being set first)
+  useEffect(() => {
+    if (urlApplied.current.district || !initialParams?.district || !districts.length) return
+    const found = districts.find(d => d.id === initialParams.district)
+    if (found) { setSelectedDistrictId(found.id); urlApplied.current.district = true }
+  }, [initialParams, districts])
+
+  // Apply mandal param when mandals are loaded (cascade: depends on selectedDistrictId being set first)
+  useEffect(() => {
+    if (urlApplied.current.mandal || !initialParams?.mandal || !mandals.length) return
+    const found = mandals.find(m => m.id === initialParams.mandal)
+    if (found) { setSelectedMandalId(found.id); urlApplied.current.mandal = true }
+  }, [initialParams, mandals])
+
+  // Auto-check availability once all URL params are applied and form is ready
+  useEffect(() => {
+    if (!initialParams || autoCheckedRef.current || !canCheck) return
+    autoCheckedRef.current = true
+    onCheckAvailability()
+  }, [canCheck, initialParams]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const filteredStates = states
 
   // When filters change, fetch members (only when required selections are satisfied)
@@ -217,6 +282,42 @@ export default function MembersPage(){
     if (level === 'DISTRICT') payload.hrcDistrictId = selectedDistrictId
     if (level === 'MANDAL') payload.hrcMandalId = selectedMandalId
     return payload
+  }
+
+  const handleCopyShareLink = () => {
+    const base = `${window.location.origin}/members`
+    const params = new URLSearchParams()
+    params.set('level', level)
+    if (activeCellId) params.set('cell', activeCellId)
+    if (designationCode) params.set('designation', designationCode)
+    if (selectedZoneId) params.set('zone', selectedZoneId)
+    if (selectedStateId) params.set('state', selectedStateId)
+    if (selectedDistrictId) params.set('district', selectedDistrictId)
+    if (selectedMandalId) params.set('mandal', selectedMandalId)
+    const url = `${base}?${params.toString()}`
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        setShareCopied(true)
+        setTimeout(() => setShareCopied(false), 2500)
+      }).catch(() => fallbackCopy(url))
+    } else {
+      fallbackCopy(url)
+    }
+  }
+
+  const fallbackCopy = (text) => {
+    try {
+      const el = document.createElement('textarea')
+      el.value = text
+      el.style.position = 'fixed'
+      el.style.opacity = '0'
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 2500)
+    } catch (_) {}
   }
 
   const handleJoin = async (e) => {
@@ -487,6 +588,18 @@ export default function MembersPage(){
                 </div>
                 <button disabled={!canCheck} onClick={onCheckAvailability} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary disabled:opacity-60">
                   {availabilityLoading ? 'Checking...' : 'Check availability'}
+                </button>
+                {/* Share pre-filled link */}
+                <button
+                  type="button"
+                  onClick={handleCopyShareLink}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                    <path d="M12.232 4.232a2.5 2.5 0 013.536 3.536l-1.225 1.224a.75.75 0 001.061 1.06l1.224-1.224a4 4 0 00-5.656-5.656l-3 3a4 4 0 00.225 5.865.75.75 0 00.977-1.138 2.5 2.5 0 01-.142-3.667l3-3z" />
+                    <path d="M11.603 7.963a.75.75 0 00-.977 1.138 2.5 2.5 0 01.142 3.667l-3 3a2.5 2.5 0 01-3.536-3.536l1.225-1.224a.75.75 0 00-1.061-1.06l-1.224 1.224a4 4 0 105.656 5.656l3-3a4 4 0 00-.225-5.865z" />
+                  </svg>
+                  {shareCopied ? 'Link copied!' : 'Copy share link'}
                 </button>
                 {requiredHint ? <p className="-mt-2 text-xs text-gray-500">{requiredHint}</p> : null}
                 {availabilityError ? <p className="text-sm text-red-600">{availabilityError}</p> : null}
