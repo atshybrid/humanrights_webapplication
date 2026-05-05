@@ -63,8 +63,16 @@ export default function PrivacyPolicyPage(){
         <h3>6. User Rights</h3>
         <p>Users may request account deletion, data export, profile updates, and can disable location or push permissions. Send requests to <a href="mailto:support@khabarx.com">support@khabarx.com</a>.</p>
 
-        <h3>7. Children’s Privacy</h3>
-        <p>KhabarX does not target children under 13.</p>
+        <h3>7. Children's Privacy &amp; Child Safety</h3>
+        <p>Khabhar X is not directed at children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that a child under 13 has provided us with personal information, we will take steps to delete such information immediately.</p>
+        <p>We maintain a strict zero-tolerance policy against Child Sexual Abuse Material (CSAM) and any content that exploits or endangers children. This includes:</p>
+        <ul>
+          <li>Child sexual abuse material (CSAM) of any kind</li>
+          <li>Content that sexualises minors</li>
+          <li>Grooming, solicitation, or exploitation of children</li>
+          <li>Content endangering the physical or emotional safety of children</li>
+        </ul>
+        <p>Violations result in immediate account termination and reporting to NCMEC and Indian law enforcement under the POCSO Act, 2012. To report violations, email <a href="mailto:hrcitodaynews@gmail.com">hrcitodaynews@gmail.com</a> with subject <strong>CHILD SAFETY REPORT</strong> or use the in-app Report button. Read our full <a href="/child-safety">Child Safety Standards</a>.</p>
 
         <h3>8. Changes to This Policy</h3>
         <p>We may update this policy; changes will be posted here and within the app.</p>

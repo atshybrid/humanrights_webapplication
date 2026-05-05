@@ -43,6 +43,17 @@ export default function TermsPage(){
 
         <h3>8. Governing Law</h3>
         <p>These terms are governed by the laws of India.</p>
+
+        <h3>9. Child Safety</h3>
+        <p>Khabhar X maintains a strict zero-tolerance policy against Child Sexual Abuse Material (CSAM) and any content that exploits, endangers, or harms children. Users must not upload, share, or distribute:</p>
+        <ul>
+          <li>Child sexual abuse material (CSAM) of any kind</li>
+          <li>Content that sexualises minors</li>
+          <li>Content used for grooming, solicitation, or exploitation of children</li>
+          <li>Any content that endangers the physical or emotional safety of children</li>
+        </ul>
+        <p>Violations will result in immediate account termination and reporting to NCMEC and relevant Indian law enforcement authorities (including under the POCSO Act, 2012). To report child safety violations, email <a href="mailto:hrcitodaynews@gmail.com">hrcitodaynews@gmail.com</a> with the subject <strong>CHILD SAFETY REPORT</strong>, or use the in-app Report button. See our full <a href="/child-safety">Child Safety Standards</a> policy for details.
+        </p>
       </div>
     </KhabarXPoliciesLayout>
   )

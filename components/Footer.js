@@ -15,11 +15,13 @@ export default function Footer(){
           <a className="block hover:underline" href="/contact">Contact</a>
           <a className="block hover:underline" href="/privacy-policy">Privacy Policy</a>
           <a className="block hover:underline" href="/terms">Terms</a>
+          <a className="block hover:underline" href="/child-safety">Child Safety</a>
         </nav>
         <nav className="text-sm">
           <div className="font-semibold text-white mb-2">KhabarX Pages</div>
           <a className="block hover:underline" href="/khabarx/privacy-policy">Privacy Policy</a>
           <a className="block hover:underline" href="/khabarx/terms">Terms &amp; Conditions</a>
+          <a className="block hover:underline" href="/child-safety">Child Safety</a>
           <a className="block hover:underline" href="/khabarx/disclaimer">Disclaimer</a>
           <a className="block hover:underline" href="/khabarx/content">Content Guidelines</a>
           <a className="block hover:underline" href="/khabarx/refund">Refund Policy</a>
