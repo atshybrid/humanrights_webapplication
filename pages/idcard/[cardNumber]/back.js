@@ -1,6 +1,6 @@
 import MemberIdCardBack from '../../../components/MemberIdCardBack'
 import IdCardExactBack from '../../../components/IdCardExactBack'
-import { getHRCIIdCard } from '../../../lib/api'
+import { getHRCIIdCard, getCardQrUrl } from '../../../lib/api'
 
 export async function getServerSideProps({ params }) {
   try {
@@ -16,7 +16,14 @@ export async function getServerSideProps({ params }) {
   const administrationOfficeAddress = setting?.administrationOfficeAddress || card?.administrationOfficeAddress || ''
   const website = setting?.website || setting?.siteUrl || card?.website || ''
   const secondLogoUrl = (setting?.secondLogoUrl || setting?.frontLogoUrl || card?.secondLogoUrl || card?.frontLogoUrl) || ''
-  const contactNumbers = [setting?.helpLineNumber1, setting?.helpLineNumber2, card?.helpLineNumber1, card?.helpLineNumber2].filter(Boolean)
+  const contactNumbers = [
+    setting?.contactNumber1,
+    setting?.contactNumber2,
+    setting?.helpLineNumber1,
+    setting?.helpLineNumber2,
+    card?.helpLineNumber1,
+    card?.helpLineNumber2,
+  ].filter(Boolean)
     const contactNumber1 = contactNumbers[0] || ''
     const contactNumber2 = contactNumbers[1] || ''
   const watermarkUrl = setting?.backWatermarkUrl || setting?.watermarkUrl || card?.watermarkUrl || 'https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/string.png'
@@ -26,7 +33,7 @@ export async function getServerSideProps({ params }) {
     return {
       props: {
         cardNumber,
-  qrUrl: (qrUrl || card?.qrUrlBack || card?.qrBack || card?.qrCodeUrl || null),
+  qrUrl: getCardQrUrl(cardNumber),
         headOfficeAddress,
         regionalOfficeAddress,
         administrationOfficeAddress,

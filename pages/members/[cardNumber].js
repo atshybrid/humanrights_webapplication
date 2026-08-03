@@ -1,5 +1,5 @@
 import IdCardExactFront from '../../components/IdCardExactFront'
-import { getHRCIIdCard, getCardWorkPlace } from '../../lib/api'
+import { getHRCIIdCard, getCardWorkPlace, getCardQrUrl } from '../../lib/api'
 
 export async function getServerSideProps({ params }) {
   try {
@@ -30,7 +30,7 @@ export async function getServerSideProps({ params }) {
     const authorSignUrl = card?.authorSignUrl || setting?.authorSignUrl || card?.signatureUrl || ''
     const photoUrl = card.photoUrl || card.profilePhotoUrl || card.photo || ''
     const watermarkUrl = setting?.frontWatermarkUrl || setting?.watermarkUrl || card?.watermarkUrl || 'https://pub-b13a983e33694dbd96cd42158ce2147b.r2.dev/string.png'
-    const qrFront = qrUrl || card?.qrUrlFront || card?.qrFront || card?.qrCodeUrl || ''
+    const qrFront = getCardQrUrl(cardNumber)
 
     return { props: { member, logoUrl, stampUrl, authorSignUrl, photoUrl, watermarkUrl, qrFront, cardNumber } }
   } catch (e) {
