@@ -1,6 +1,6 @@
 import IdCardExactFront from '../../components/IdCardExactFront'
 import IdCardExactBack from '../../components/IdCardExactBack'
-import { getHRCIIdCard } from '../../lib/api'
+import { getHRCIIdCard, getCardWorkPlace } from '../../lib/api'
 
 export async function getServerSideProps({ params }) {
   try {
@@ -21,7 +21,7 @@ export async function getServerSideProps({ params }) {
       memberId: card.cardNumber || card.membershipId || '',
       phone: card.mobileNumber || '',
       validity: card.expiresAt ? `Valid Thru: ${new Date(card.expiresAt).toLocaleString('en-US', { month: 'short', year: 'numeric' })}` : '',
-      workPlace: card.workPlace || card.workplace || [card.stateName, card.districtName, card.mandalName].filter(Boolean).join(', ')
+      workPlace: getCardWorkPlace(card)
     }
     const logoUrl = (
       rootFrontLogoUrl ||
