@@ -22,12 +22,12 @@ export default function Gallery({ items = [] }) {
             href="/gallery"
             className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm sm:rounded-2xl"
           >
-            <div className="relative aspect-[4/3]">
+            <div className="relative aspect-[3/4] bg-gray-50 p-2 sm:p-3">
               <Image
                 src={getGalleryImageSrc(item)}
                 alt={item.title || 'Gallery image'}
                 fill
-                className="object-cover transition duration-300 group-hover:scale-105"
+                className="object-contain p-1"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />
             </div>

@@ -31,12 +31,12 @@ function GalleryCard({ item, onOpen }) {
       onClick={() => onOpen(item)}
       className="group overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+      <div className="relative aspect-[3/4] overflow-hidden bg-gray-50 p-2 sm:p-3">
         <Image
           src={src}
           alt={item.title || 'Gallery image'}
           fill
-          className="object-cover transition duration-300 group-hover:scale-105"
+          className="object-contain p-1"
           sizes="(max-width: 768px) 50vw, 25vw"
         />
       </div>
@@ -165,13 +165,12 @@ export default function GalleryTabs({ initialPress, initialEvents }) {
                 className="max-h-[80vh] w-full rounded-xl bg-black"
               />
             ) : (
-              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-black">
-                <Image
+              <div className="flex max-h-[80vh] w-full items-center justify-center overflow-hidden rounded-xl bg-black/90 p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={getGalleryImageSrc(activeItem)}
                   alt={activeItem.title || 'Gallery image'}
-                  fill
-                  className="object-contain"
-                  sizes="100vw"
+                  className="max-h-[78vh] w-auto max-w-full object-contain"
                 />
               </div>
             )}
