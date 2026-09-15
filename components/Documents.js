@@ -1,14 +1,30 @@
-export default function Documents(){
+import Link from 'next/link'
+import SectionHeader from './SectionHeader'
+
+export default function Documents() {
   return (
-    <section id="documents" className="mt-16">
-      <h2 className="text-3xl font-bold text-gray-900">Trusted Documents</h2>
-      <div className="mt-2 h-1.5 w-16 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
-      <p className="mt-4 text-gray-600">Our registrations, audit reports, and compliance documents.</p>
-      <ul className="mt-6 space-y-2 text-sm">
-        <li><a className="text-secondary hover:underline" href="#">Registration certificate (PRGI / RNI placeholder)</a></li>
-        <li><a className="text-secondary hover:underline" href="#">Audit report 2024 (PDF)</a></li>
-        <li><a className="text-secondary hover:underline" href="#">Policy &amp; Governance charter</a></li>
-      </ul>
+    <section id="documents" className="scroll-mt-20">
+      <SectionHeader
+        title="Trusted Documents"
+        description="Our registrations, audit reports, and compliance documents."
+        actionHref="/documents"
+        actionLabel="Browse all"
+      />
+      <div className="grid gap-3 sm:grid-cols-3">
+        {[
+          { label: 'Registration certificate', href: '/documents' },
+          { label: 'Audit report 2024 (PDF)', href: '/documents' },
+          { label: 'Policy & Governance charter', href: '/documents' },
+        ].map((doc) => (
+          <Link
+            key={doc.label}
+            href={doc.href}
+            className="rounded-xl border border-gray-200 bg-white px-4 py-4 text-sm font-medium text-gray-800 shadow-sm transition hover:border-secondary/30 hover:text-secondary"
+          >
+            {doc.label}
+          </Link>
+        ))}
+      </div>
     </section>
   )
 }

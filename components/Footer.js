@@ -10,6 +10,7 @@ export default function Footer(){
           <div className="font-semibold text-white mb-2">Site Links</div>
           <a className="block hover:underline" href="/">Home</a>
           <a className="block hover:underline" href="/documents">Documents</a>
+          <a className="block hover:underline" href="/gallery">Gallery</a>
           <a className="block hover:underline" href="/members">Members</a>
           <a className="block hover:underline" href="/donations">Donations</a>
           <a className="block hover:underline" href="/contact">Contact</a>

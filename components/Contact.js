@@ -1,25 +1,42 @@
-export default function Contact(){
+import SectionHeader from './SectionHeader'
+
+export default function Contact() {
   return (
-    <section id="contact" className="mt-16">
-      <h2 className="text-3xl font-bold text-gray-900">Contact</h2>
-      <div className="mt-2 h-1.5 w-16 bg-gradient-to-r from-primary to-secondary rounded-full"></div>
-      <p className="mt-4 text-gray-600">Reach us for donations, legal help, or partnerships.</p>
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div>
-          <p><strong>Head Office</strong><br/>HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)<br/>FLAT NO- 502 H NO- 831-, GD COLONY, MAYUR VIHAR PH- 3 DELHI- 110096</p>
-          <p className="mt-2"><strong>Email</strong><br/>support@humanrightscouncilforindia.org</p>
-          <p className="mt-2"><strong>Phone</strong><br/>+91 8906189999</p>
+    <section id="contact" className="scroll-mt-20">
+      <SectionHeader
+        title="Contact"
+        description="Reach us for donations, legal help, or partnerships."
+      />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <p className="text-sm leading-relaxed text-gray-800 sm:text-base">
+            <strong className="text-gray-900">Head Office</strong><br />
+            HUMAN RIGHTS COUNCIL FOR INDIA (HRCI)<br />
+            FLAT NO- 502 H NO- 831-, GD COLONY, MAYUR VIHAR PH- 3 DELHI- 110096
+          </p>
+          <p className="mt-4 text-sm sm:text-base">
+            <strong className="text-gray-900">Email</strong><br />
+            <a href="mailto:support@humanrightscouncilforindia.org" className="text-secondary hover:underline">
+              support@humanrightscouncilforindia.org
+            </a>
+          </p>
+          <p className="mt-4 text-sm sm:text-base">
+            <strong className="text-gray-900">Phone</strong><br />
+            <a href="tel:+918906189999" className="text-secondary hover:underline">+91 8906189999</a>
+          </p>
         </div>
-        <form className="p-5 rounded-xl border border-gray-200 bg-white shadow-sm">
-          <label className="block">
+        <form className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
+          <label className="block text-sm font-medium text-gray-700">
             Name
-            <input className="w-full mt-1 p-2 rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/60 outline-none transition" />
+            <input className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/60" />
           </label>
-          <label className="block mt-3">
+          <label className="mt-4 block text-sm font-medium text-gray-700">
             Message
-            <textarea className="w-full mt-1 p-2 rounded border border-gray-300 focus:border-secondary focus:ring-2 focus:ring-secondary/60 outline-none transition" rows="4" />
+            <textarea className="mt-1 w-full rounded-lg border border-gray-300 p-2.5 text-sm outline-none transition focus:border-secondary focus:ring-2 focus:ring-secondary/60" rows="4" />
           </label>
-          <button className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary">Send</button>
+          <button type="button" className="mt-4 inline-flex items-center rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary">
+            Send
+          </button>
         </form>
       </div>
     </section>

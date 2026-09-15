@@ -9,7 +9,14 @@ const nextConfig = {
       'app.hrcitodaynews.in',
       'app.humanrightscouncilforindia.org',
       'cdn.jsdelivr.net',
-      // Add other image domains as needed
+      'pub-b13a983e33694dbd96cd42158ce2147b.r2.dev',
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'pub-b13a983e33694dbd96cd42158ce2147b.r2.dev',
+        pathname: '/gallery/**',
+      },
     ],
   },
   
