@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { groupGalleryByEvent, getGalleryImageSrc } from '../lib/gallery'
 
@@ -11,6 +11,16 @@ const TABS = [
   { id: 'EVENT_CLIP', label: 'Events' },
   { id: 'PRESS_CLIP', label: 'Press Clips' },
 ]
+
+function getInitialTab(initialPress, initialEvents) {
+  if (initialEvents?.data?.length) return 'EVENT_CLIP'
+  if (initialPress?.data?.length) return 'PRESS_CLIP'
+  return 'EVENT_CLIP'
+}
+
+function getSeedData(tab, initialPress, initialEvents) {
+  return tab === 'PRESS_CLIP' ? initialPress : initialEvents
+}
 
 async function loadGalleryPage(category, cursor) {
   const path = category === 'PRESS_CLIP' ? '/gallery/press-clips' : '/gallery/event-clips'
@@ -73,31 +83,37 @@ function EventSection({ group, onOpen }) {
 }
 
 export default function GalleryTabs({ initialPress, initialEvents }) {
-  const [tab, setTab] = useState('EVENT_CLIP')
-  const [items, setItems] = useState([])
-  const [cursor, setCursor] = useState(null)
+  const initialTab = getInitialTab(initialPress, initialEvents)
+  const initialSeed = getSeedData(initialTab, initialPress, initialEvents)
+
+  const [tab, setTab] = useState(initialTab)
+  const [items, setItems] = useState(initialSeed?.data || [])
+  const [cursor, setCursor] = useState(initialSeed?.nextCursor || null)
   const [loading, setLoading] = useState(false)
   const [activeItem, setActiveItem] = useState(null)
 
-  const seed = tab === 'PRESS_CLIP' ? initialPress : initialEvents
+  const switchTab = useCallback((nextTab) => {
+    if (nextTab === tab) return
+    const seed = getSeedData(nextTab, initialPress, initialEvents)
+    setTab(nextTab)
+    setItems(seed?.data || [])
+    setCursor(seed?.nextCursor || null)
+    setActiveItem(null)
+  }, [tab, initialPress, initialEvents])
 
-  const load = useCallback(async (reset = false) => {
+  const loadMore = useCallback(async () => {
+    if (!cursor || loading) return
     setLoading(true)
     try {
-      const json = await loadGalleryPage(tab, reset ? null : cursor)
-      setItems((prev) => (reset ? json.data : [...prev, ...json.data]))
+      const json = await loadGalleryPage(tab, cursor)
+      setItems((prev) => [...prev, ...(json.data || [])])
       setCursor(json.nextCursor)
     } catch (e) {
       console.error(e)
     } finally {
       setLoading(false)
     }
-  }, [tab, cursor])
-
-  useEffect(() => {
-    setItems(seed?.data || [])
-    setCursor(seed?.nextCursor || null)
-  }, [tab, seed])
+  }, [tab, cursor, loading])
 
   const eventGroups = useMemo(() => groupGalleryByEvent(items), [items])
 
@@ -108,7 +124,8 @@ export default function GalleryTabs({ initialPress, initialEvents }) {
           <button
             key={id}
             type="button"
-            onClick={() => setTab(id)}
+            onClick={() => switchTab(id)}
+            aria-pressed={tab === id}
             className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
               tab === id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'
             }`}
@@ -126,7 +143,7 @@ export default function GalleryTabs({ initialPress, initialEvents }) {
       ) : (
         <div className="space-y-6">
           {eventGroups.map((group) => (
-            <EventSection key={group.title} group={group} onOpen={setActiveItem} />
+            <EventSection key={`${tab}-${group.title}`} group={group} onOpen={setActiveItem} />
           ))}
         </div>
       )}
@@ -135,7 +152,7 @@ export default function GalleryTabs({ initialPress, initialEvents }) {
         <div className="mt-8 flex justify-center">
           <button
             type="button"
-            onClick={() => load(false)}
+            onClick={loadMore}
             disabled={loading}
             className="inline-flex items-center rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-secondary disabled:opacity-60"
           >
